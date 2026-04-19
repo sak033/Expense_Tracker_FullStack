@@ -2,6 +2,8 @@ package com.expensetracker.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import jakarta.validation.constraints.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "users")
@@ -14,12 +16,17 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Name should not be empty")
     @Column(nullable = false)
     private String name;
 
+    @Email(message = "Invalid email format")
+    @NotBlank(message = "Email should not be empty")
     @Column(nullable = false, unique = true)
     private String email;
 
+    @NotBlank(message = "Password should not be empty")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(nullable = false)
-    private String password;  // added for future auth
+    private String password;
 }
