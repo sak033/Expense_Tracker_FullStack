@@ -29,4 +29,9 @@ public class User {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(nullable = false)
     private String password;
+
+    // ✅ ADD THIS
+    @NotBlank(message = "UPI ID is required")
+    @Column(nullable = false)
+    private String upiId;
 }

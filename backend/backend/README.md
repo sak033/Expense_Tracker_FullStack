@@ -6,7 +6,17 @@ Base URL: `http://localhost:8080`
 
 ## Overview
 
-The backend exposes endpoints for managing users, groups, expenses, and group settlement information.
+The backend exposes endpoints for managing users, groups, expenses, group settlement information, and QR-based UPI payment links.
+
+## JWT Authentication
+
+The backend uses JWT-based authentication for protected group and expense endpoints.
+
+- Login endpoint: `POST /auth/login`
+- Request body: email and password
+- Response: JWT token string
+- Use token in `Authorization` header for protected requests:
+  - `Authorization: Bearer <token>`
 
 ## Endpoints
 
@@ -21,7 +31,8 @@ The backend exposes endpoints for managing users, groups, expenses, and group se
 {
   "name": "Alice",
   "email": "alice@example.com",
-  "password": "password123"
+  "password": "password123",
+  "upiId": "alice@upi"
 }
 ```
 
@@ -31,11 +42,11 @@ The backend exposes endpoints for managing users, groups, expenses, and group se
   "id": 1,
   "name": "Alice",
   "email": "alice@example.com",
-  "password": "password123"
+  "upiId": "alice@upi"
 }
 ```
 
-> Note: Password storage is currently plain text in the entity model. In production, use hashed passwords and exclude them from API responses.
+> Note: Passwords must never appear in API responses. In production, passwords should be stored securely hashed and excluded from response DTOs.
 
 ---
 
@@ -67,25 +78,25 @@ The backend exposes endpoints for managing users, groups, expenses, and group se
       "id": 1,
       "name": "Alice",
       "email": "alice@example.com",
-      "password": "password123"
+      "upiId": "alice@upi"
     },
     {
       "id": 2,
       "name": "Bob",
       "email": "bob@example.com",
-      "password": "password456"
+      "upiId": "bob@upi"
     },
     {
       "id": 3,
       "name": "Charlie",
       "email": "charlie@example.com",
-      "password": "password789"
+      "upiId": "charlie@upi"
     }
   ]
 }
 ```
 
-> Note: The group creation logic resolves member `id` values to full user objects before saving.
+> Note: The group creation logic resolves member `id` values to full user objects before saving. Passwords are excluded from responses.
 
 ---
 
@@ -118,15 +129,15 @@ The backend exposes endpoints for managing users, groups, expenses, and group se
     "id": 1,
     "name": "Alice",
     "email": "alice@example.com",
-    "password": "password123"
+    "upiId": "alice@upi"
   },
   "group": {
     "id": 1,
     "name": "Weekend Trip",
     "members": [
-      { "id": 1, "name": "Alice", "email": "alice@example.com", "password": "password123" },
-      { "id": 2, "name": "Bob", "email": "bob@example.com", "password": "password456" },
-      { "id": 3, "name": "Charlie", "email": "charlie@example.com", "password": "password789" }
+      { "id": 1, "name": "Alice", "email": "alice@example.com", "upiId": "alice@upi" },
+      { "id": 2, "name": "Bob", "email": "bob@example.com", "upiId": "bob@upi" },
+      { "id": 3, "name": "Charlie", "email": "charlie@example.com", "upiId": "charlie@upi" }
     ]
   },
   "splits": [
@@ -137,7 +148,7 @@ The backend exposes endpoints for managing users, groups, expenses, and group se
         "id": 1,
         "name": "Alice",
         "email": "alice@example.com",
-        "password": "password123"
+        "upiId": "alice@upi"
       }
     },
     {
@@ -147,7 +158,7 @@ The backend exposes endpoints for managing users, groups, expenses, and group se
         "id": 2,
         "name": "Bob",
         "email": "bob@example.com",
-        "password": "password456"
+        "upiId": "bob@upi"
       }
     },
     {
@@ -157,14 +168,14 @@ The backend exposes endpoints for managing users, groups, expenses, and group se
         "id": 3,
         "name": "Charlie",
         "email": "charlie@example.com",
-        "password": "password789"
+        "upiId": "charlie@upi"
       }
     }
   ]
 }
 ```
 
-> Note: Expense splits are normalized to equal shares by the backend and stored with `amountOwed` on each split.
+> Note: Expense splits are normalized to equal shares by the backend and stored with `amountOwed` on each split. Passwords are not returned in API responses.
 
 ---
 
@@ -196,12 +207,75 @@ The backend exposes endpoints for managing users, groups, expenses, and group se
 #### Response Example
 ```json
 [
-  "Bob pays Alice ₹400.0",
-  "Charlie pays Alice ₹400.0"
+  {
+    "from": "Bob",
+    "to": "Alice",
+    "amount": 400.0
+  },
+  {
+    "from": "Charlie",
+    "to": "Alice",
+    "amount": 400.0
+  }
 ]
 ```
 
-> Settlement output is a list of human-readable transactions based on current group balances.
+> Settlement output is returned as a structured DTO list for easier client integration.
+
+---
+
+### 6. Add Member to Group
+
+- Method: `POST`
+- URL: `/groups/{groupId}/add-member/{userId}`
+- Description: Add an existing user to an existing group.
+
+#### Response Example
+```json
+{
+  "id": 1,
+  "name": "Weekend Trip",
+  "members": [
+    { "id": 1, "name": "Alice", "email": "alice@example.com", "upiId": "alice@upi" },
+    { "id": 2, "name": "Bob", "email": "bob@example.com", "upiId": "bob@upi" },
+    { "id": 3, "name": "Charlie", "email": "charlie@example.com", "upiId": "charlie@upi" },
+    { "id": 4, "name": "Dave", "email": "dave@example.com", "upiId": "dave@upi" }
+  ]
+}
+```
+
+---
+
+### 7. Get Group Join Link
+
+- Method: `GET`
+- URL: `/groups/{groupId}/join-link`
+- Description: Retrieve a shareable group join link for a given group.
+
+#### Response Example
+```json
+"http://localhost:3000/join?groupId=1"
+```
+
+---
+
+### 8. Generate Group Join QR
+
+- Method: `GET`
+- URL: `/groups/{groupId}/qr`
+- Description: Generate a QR code image for the group join link.
+
+> This endpoint returns binary PNG content suitable for rendering or download by the client.
+
+---
+
+### 9. Generate Payment QR (UPI)
+
+- Method: `GET`
+- URL: `/groups/{groupId}/payment-qr`
+- Description: Generate a UPI payment QR code for the group's payee.
+
+> This endpoint returns binary PNG content for UPI payment scanning.
 
 ## Data Models
 
@@ -209,7 +283,7 @@ The backend exposes endpoints for managing users, groups, expenses, and group se
 - `id` (Long)
 - `name` (String)
 - `email` (String)
-- `password` (String)
+- `upiId` (String)
 
 ### Group
 - `id` (Long)
@@ -231,8 +305,10 @@ The backend exposes endpoints for managing users, groups, expenses, and group se
 ## Notes
 
 - The backend currently uses JPA entity serialization directly for API responses.
-- There is no dedicated validation or custom error response handling in the current controller implementation.
-- If a referenced user or group does not exist, the controller will throw an exception and return a server error.
+- Protected endpoints require a valid JWT in the `Authorization` header.
+- Passwords are not shown in API responses and should be stored securely hashed in production.
+- The current controllers do not provide custom error payloads; missing entities may return runtime errors.
+- QR endpoints return PNG image content for client rendering or download.
 
 ## Running the Application
 

@@ -16,6 +16,17 @@ import com.expensetracker.backend.entity.ExpenseSplit;
 import java.util.List;
 import java.util.*;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+
+import jakarta.servlet.http.HttpServletResponse;
+
+import com.expensetracker.backend.dto.SettlementDTO;
+
+
+
 @RestController
 @RequestMapping("/groups")
 public class GroupController {
@@ -87,7 +98,7 @@ public class GroupController {
     }
 
     @GetMapping("/{groupId}/settle")
-    public List<String> settleBalances(@PathVariable Long groupId) {
+    public List<SettlementDTO> settleBalances(@PathVariable Long groupId) {
 
         Map<String, Double> balances = getBalances(groupId);
 
@@ -103,7 +114,7 @@ public class GroupController {
             }
         }
 
-        List<String> transactions = new ArrayList<>();
+        List<SettlementDTO> transactions = new ArrayList<>();
 
         int i = 0, j = 0;
 
@@ -117,16 +128,94 @@ public class GroupController {
 
             double settledAmount = Math.min(debt, credit);
 
-            transactions.add(debtor + " pays " + creditor + " ₹" + settledAmount);
+            transactions.add(new SettlementDTO(debtor, creditor, settledAmount));
 
-            debtors.get(i).setValue(-(debt - settledAmount));
-            creditors.get(j).setValue(credit - settledAmount);
+            double remainingDebt = debt - settledAmount;
+            double remainingCredit = credit - settledAmount;
 
-            if (debt - settledAmount == 0) i++;
-            if (credit - settledAmount == 0) j++;
+            debtors.get(i).setValue(-remainingDebt);
+            creditors.get(j).setValue(remainingCredit);
+
+            if (remainingDebt == 0) i++;
+            if (remainingCredit == 0) j++;
         }
 
         return transactions;
+    }
+
+    @GetMapping("/{groupId}/join-link")
+    public String getJoinLink(@PathVariable Long groupId) {
+
+        return "http://localhost:3000/join?groupId=" + groupId;
+    }
+
+
+    @GetMapping("/{groupId}/qr")
+    public void generateQR(@PathVariable Long groupId, HttpServletResponse response) {
+
+        try {
+            String joinLink = "http://localhost:3000/join?groupId=" + groupId;
+
+            QRCodeWriter qrCodeWriter = new QRCodeWriter();
+            BitMatrix bitMatrix = qrCodeWriter.encode(joinLink, BarcodeFormat.QR_CODE, 300, 300);
+
+            response.setContentType("image/png");
+
+            MatrixToImageWriter.writeToStream(bitMatrix, "PNG", response.getOutputStream());
+
+        } catch (Exception e) {
+            throw new RuntimeException("QR generation failed");
+        }
+    }
+
+    @GetMapping("/{groupId}/payment-qr")
+    public void generatePaymentQR(@PathVariable Long groupId, HttpServletResponse response) {
+
+        try {
+            List<SettlementDTO> settlements = settleBalances(groupId);
+
+            SettlementDTO s = settlements.get(0);
+
+            String receiverName = s.getTo();
+            String amount = String.valueOf(s.getAmount());
+
+
+
+            // ✅ FIND USER FROM DB
+            User receiver = userRepository.findByName(receiverName)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            // ✅ USE REAL UPI ID
+            String upiLink = "upi://pay?pa=" + receiver.getUpiId()
+                    + "&pn=" + receiver.getName()
+                    + "&am=" + amount;
+
+            QRCodeWriter qrCodeWriter = new QRCodeWriter();
+            BitMatrix bitMatrix = qrCodeWriter.encode(upiLink, BarcodeFormat.QR_CODE, 300, 300);
+
+            response.setContentType("image/png");
+            MatrixToImageWriter.writeToStream(bitMatrix, "PNG", response.getOutputStream());
+
+        } catch (Exception e) {
+            throw new RuntimeException("Payment QR failed");
+        }
+    }
+
+    @PostMapping("/{groupId}/add-member/{userId}")
+    public Group addMember(@PathVariable Long groupId, @PathVariable Long userId) {
+
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // avoid duplicate
+        if (!group.getMembers().contains(user)) {
+            group.getMembers().add(user);
+        }
+
+        return groupRepository.save(group);
     }
 }
 
