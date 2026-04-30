@@ -3,6 +3,7 @@ package com.expensetracker.backend.security;
 import com.expensetracker.backend.auth.JwtUtil;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
@@ -13,20 +14,23 @@ public class JwtFilter implements Filter {
             throws IOException, ServletException {
 
         HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletResponse res = (HttpServletResponse) response;
 
         String authHeader = req.getHeader("Authorization");
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+        // ✅ If no token → just continue (don't crash)
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            chain.doFilter(request, response);
+            return;
+        }
 
-            String token = authHeader.substring(7);
+        String token = authHeader.substring(7);
 
-            try {
-                JwtUtil.extractEmail(token); // validate token
-            } catch (Exception e) {
-                throw new RuntimeException("Invalid Token");
-            }
-        } else {
-            throw new RuntimeException("Missing Token");
+        try {
+            JwtUtil.extractEmail(token); // validate token
+        } catch (Exception e) {
+            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // ✅ 401 instead of 500
+            return;
         }
 
         chain.doFilter(request, response);

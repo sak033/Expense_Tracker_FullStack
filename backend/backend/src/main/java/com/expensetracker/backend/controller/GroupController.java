@@ -1,5 +1,6 @@
 package com.expensetracker.backend.controller;
 
+import com.expensetracker.backend.dto.GroupDTO;
 import com.expensetracker.backend.entity.Group;
 import com.expensetracker.backend.entity.User;
 import com.expensetracker.backend.repository.ExpenseRepository;
@@ -51,6 +52,18 @@ public class GroupController {
         group.setMembers(users);
 
         return groupRepository.save(group);
+    }
+
+
+    @GetMapping
+    public List<GroupDTO> getAllGroups() {
+        return groupRepository.findAll().stream()
+                .map(group -> new GroupDTO(
+                        group.getId(),
+                        group.getName(),
+                        group.getMembers().size() // 👈 safe here
+                ))
+                .toList();
     }
 
     @GetMapping("/{groupId}/balances")
