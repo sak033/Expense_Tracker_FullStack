@@ -17,8 +17,8 @@ export default function Login() {
       });
       console.log(res.data); 
       // ✅ store JWT token
-      localStorage.setItem("token", res.data);
-
+      localStorage.setItem("token", res.data.token);
+localStorage.setItem("name", res.data.name);
       navigate("/dashboard");
       // 👉 next step: redirect to dashboard
     } catch (err) {

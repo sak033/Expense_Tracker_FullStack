@@ -5,7 +5,11 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import java.io.IOException;
+import java.util.Collections;
 
 public class JwtFilter implements Filter {
 
@@ -18,7 +22,6 @@ public class JwtFilter implements Filter {
 
         String authHeader = req.getHeader("Authorization");
 
-        // ✅ If no token → just continue (don't crash)
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             chain.doFilter(request, response);
             return;
@@ -27,9 +30,21 @@ public class JwtFilter implements Filter {
         String token = authHeader.substring(7);
 
         try {
-            JwtUtil.extractEmail(token); // validate token
+            // ✅ extract email
+            String email = JwtUtil.extractEmail(token);
+
+            // 🔥 ADD THIS BLOCK (IMPORTANT)
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(
+                            email,
+                            null,
+                            Collections.emptyList()
+                    );
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
         } catch (Exception e) {
-            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // ✅ 401 instead of 500
+            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 

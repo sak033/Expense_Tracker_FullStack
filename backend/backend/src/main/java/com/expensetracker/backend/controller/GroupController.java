@@ -182,23 +182,16 @@ public class GroupController {
     }
 
     @GetMapping("/{groupId}/payment-qr")
-    public void generatePaymentQR(@PathVariable Long groupId, HttpServletResponse response) {
+    public void generatePaymentQR(
+            @PathVariable Long groupId,
+            @RequestParam String to,
+            @RequestParam double amount,
+            HttpServletResponse response) {
 
         try {
-            List<SettlementDTO> settlements = settleBalances(groupId);
-
-            SettlementDTO s = settlements.get(0);
-
-            String receiverName = s.getTo();
-            String amount = String.valueOf(s.getAmount());
-
-
-
-            // ✅ FIND USER FROM DB
-            User receiver = userRepository.findByName(receiverName)
+            User receiver = userRepository.findByName(to)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            // ✅ USE REAL UPI ID
             String upiLink = "upi://pay?pa=" + receiver.getUpiId()
                     + "&pn=" + receiver.getName()
                     + "&am=" + amount;
@@ -213,7 +206,6 @@ public class GroupController {
             throw new RuntimeException("Payment QR failed");
         }
     }
-
     @PostMapping("/{groupId}/add-member/{userId}")
     public Group addMember(@PathVariable Long groupId, @PathVariable Long userId) {
 
@@ -230,5 +222,13 @@ public class GroupController {
 
         return groupRepository.save(group);
     }
+
+    @GetMapping("/{groupId}/members")
+    public List<User> getMembers(@PathVariable Long groupId) {
+        Group group = groupRepository.findById(groupId).orElseThrow();
+        return group.getMembers();
+    }
+
+
 }
 
