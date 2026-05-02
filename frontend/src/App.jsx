@@ -3,6 +3,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import GroupDetails from "./pages/GroupDetails";  
 import Register from "./pages/Register";
+import CreateGroup from "./pages/CreateGroup";  
 
 function App() {
   return (
@@ -12,7 +13,7 @@ function App() {
          <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/groups/:id" element={<GroupDetails />} />
         <Route path="/register" element={<Register />} />
-
+        <Route path="/create-group" element={<CreateGroup />} />
       </Routes>
     </BrowserRouter>
   );

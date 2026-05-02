@@ -33,9 +33,10 @@ const navigate = useNavigate();
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Your Groups</h1>
-
+      
       {groups.length === 0 ? (
         <p>No groups found</p>
+        
       ) : (
         <div className="grid gap-4">
           {groups.map((group) => (
@@ -55,6 +56,13 @@ const navigate = useNavigate();
           ))}
         </div>
       )}
+
+      <button
+  onClick={() => navigate("/create-group")}
+  className="mb-4 bg-green-500 text-white px-4 py-2 rounded"
+>
+  + Create Group
+</button>
     </div>
   );
 }
