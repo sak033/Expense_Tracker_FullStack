@@ -203,6 +203,32 @@ const handleMarkPaid = () => {
 
   setShowModal(false);
 };
+const addMember = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const userId = prompt("Enter user ID to add:");
+
+    await axios.post(
+      `https://expense-tracker-fullstack-sni7.onrender.com/groups/${id}/add-member/${userId}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    alert("Member added ✅");
+
+    fetchMembers(); // refresh UI
+
+  } catch (err) {
+    console.error(err);
+    alert("Error adding member ❌");
+  }
+};
+
 
   return (
     
@@ -246,6 +272,13 @@ const handleMarkPaid = () => {
     </button>
   </div>
 )}
+
+<button
+  onClick={addMember}
+  className="mb-4 bg-purple-500 text-white px-4 py-2 rounded"
+>
+  + Add Member
+</button>
 
       {/* 🔥 BALANCES */}
       <div className="mb-6">
