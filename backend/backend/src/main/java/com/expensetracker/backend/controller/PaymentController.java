@@ -13,7 +13,7 @@ import com.expensetracker.backend.entity.Settlement;
 
 @RestController
 @RequestMapping("/payments")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "https://expense-tracker-full-stack-frontend.vercel.app")
 public class PaymentController {
 
     @Autowired
