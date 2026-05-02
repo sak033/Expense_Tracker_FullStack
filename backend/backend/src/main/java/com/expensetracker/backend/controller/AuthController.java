@@ -16,7 +16,7 @@ public class AuthController {
     private UserRepository userRepository;
 
     @PostMapping("/login")
-    public Map<String, String> login(@RequestBody LoginRequest request) {
+    public Map<String, Object> login(@RequestBody LoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -27,7 +27,8 @@ public class AuthController {
 
         String token = JwtUtil.generateToken(user.getEmail());
 
-        Map<String, String> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", user.getId());     // 👈 ADD THIS
         response.put("token", token);
         response.put("name", user.getName());
 
