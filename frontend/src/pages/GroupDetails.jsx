@@ -52,7 +52,7 @@ const fetchExpenses = async () => {
     fetchData();
      fetchMembers();
      fetchExpenses();
-     fetchSettlements();
+     
   }, []);
 
   const fetchData = async () => {
@@ -113,7 +113,7 @@ const fetchExpenses = async () => {
     fetchData(); // 🔥 refresh balances
     fetchExpenses(); // 🔥 refresh expenses list
     fetchSettlements(); // 🔥 refresh settlements list
-    
+
 
   } catch (err) {
     console.error("Error adding expense", err);
