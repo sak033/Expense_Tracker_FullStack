@@ -45,8 +45,22 @@ public class PaymentController {
     }
 
     @PostMapping("/verify")
-    public String verifyPayment(@RequestBody Map<String, String> body) {
+    public String verifyPayment(@RequestBody Map<String, String> body) throws Exception {
 
+        String razorpayOrderId = body.get("razorpay_order_id");
+        String razorpayPaymentId = body.get("razorpay_payment_id");
+        String razorpaySignature = body.get("razorpay_signature");
+
+        String generatedSignature = generateSignature(
+                razorpayOrderId + "|" + razorpayPaymentId,
+                keySecret
+        );
+
+        if (!generatedSignature.equals(razorpaySignature)) {
+            throw new RuntimeException("Invalid payment signature ❌");
+        }
+
+        // ✅ Now safe to mark as PAID
         Long settlementId = Long.parseLong(body.get("settlementId"));
 
         Settlement s = settlementRepository.findById(settlementId)
@@ -55,7 +69,7 @@ public class PaymentController {
         s.setStatus("PAID");
         settlementRepository.save(s);
 
-        return "Payment successful";
+        return "Payment verified and recorded ✅";
     }
 
     private String generateSignature(String data, String key) throws Exception {

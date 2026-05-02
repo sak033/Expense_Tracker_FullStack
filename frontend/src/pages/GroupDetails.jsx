@@ -120,12 +120,13 @@ const fetchExpenses = async () => {
   }
 };
 
-const handlePay = async (settlement) => {
+const handlePay = async (amount, settlementId) => {
   try {
     const token = localStorage.getItem("token");
 
+    // 🔥 Step 1: create order
     const res = await axios.post(
-      `https://expense-tracker-fullstack-sni7.onrender.com/payments/create-order?amount=${settlement.amount}`,
+      `https://expense-tracker-fullstack-sni7.onrender.com/payments/create-order?amount=${amount}`,
       {},
       {
         headers: {
@@ -134,66 +135,51 @@ const handlePay = async (settlement) => {
       }
     );
 
+    const { orderId, amount: amt } = res.data;
+
+    // 🔥 Step 2: Razorpay options
     const options = {
-      key: "rzp_test_Sk7y3P0HIOOJbN", // your key
-      amount: settlement.amount * 100,
+      key: "rzp_test_Sk7y3P0HIOOJbN", // 👈 replace with your Razorpay key
+      amount: amt * 100,
       currency: "INR",
       name: "Expense Tracker",
       description: "Settlement Payment",
-      order_id: res.data.orderId,
+      order_id: orderId,
 
-      handler: function (response) {
-        console.log("Payment Success:", response);
+      // 👉 THIS IS WHERE YOUR HANDLER GOES
+      handler: async function (response) {
 
-        // 👇 IMPORTANT (we use this next)
-        verifyPayment(response, settlement);
+  await axios.post(
+    "https://expense-tracker-fullstack-sni7.onrender.com/payments/verify",
+    {
+      razorpay_order_id: response.razorpay_order_id,
+      razorpay_payment_id: response.razorpay_payment_id,
+      razorpay_signature: response.razorpay_signature,
+      settlementId: settlementId
+    }
+  );
+
+  alert("Payment successful ✅");
+
+  fetchData(); // ✅ correct refresh
+},
+
+      theme: {
+        color: "#3399cc",
       },
-
-      modal: {
-        ondismiss: function () {
-          console.log("Payment closed");
-        }
-      }
     };
 
+    // 🔥 Step 3: open popup
     const rzp = new window.Razorpay(options);
     rzp.open();
 
   } catch (err) {
     console.error(err);
+    alert("Payment failed ❌");
   }
 };
 
-const verifyPayment = async (response, settlement) => {
-  try {
-    const token = localStorage.getItem("token");
 
-    await axios.post(
-      "https://expense-tracker-fullstack-sni7.onrender.com/payments/verify",
-      {
-        orderId: response.razorpay_order_id,
-        paymentId: response.razorpay_payment_id,
-        signature: response.razorpay_signature,
-        settlementId: settlement.id
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    alert("Payment successful ✅");
-
-    // 🔥 REMOVE FROM UI (IMPORTANT)
-    setSettlements(prev =>
-      prev.filter(item => item.id !== settlement.id)
-    );
-
-  } catch (err) {
-    console.error("Verification failed", err);
-  }
-};
 const handleMarkPaid = () => {
   setSettlements(prev =>
     prev.filter(item =>
@@ -339,7 +325,7 @@ const addMember = async () => {
 
     {s.fromUser === currentUser && (
   <button
-   onClick={() => handlePay(s)}
+   onClick={() => handlePay(s.amount, s.id)}
     className="bg-green-500 text-white px-3 py-1 rounded"
   >
     Pay
