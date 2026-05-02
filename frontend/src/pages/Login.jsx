@@ -58,6 +58,12 @@ localStorage.setItem("name", res.data.name);
         >
           Login
         </button>
+        <p
+  className="text-sm text-center mt-3 text-blue-500 cursor-pointer"
+  onClick={() => navigate("/register")}
+>
+  Create Account
+</p>
       </form>
     </div>
   );
