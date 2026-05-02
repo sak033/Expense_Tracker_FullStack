@@ -11,7 +11,9 @@ export default function Register() {
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
+
     e.preventDefault();
+console.log("Register clicked");
 
     try {
       await axios.post(
