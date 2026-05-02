@@ -16,7 +16,7 @@ const navigate = useNavigate();
       const token = localStorage.getItem("token");
       
       console.log("TOKEN:", token); 
-      const res = await axios.get("http://localhost:8080/groups", {
+      const res = await axios.get("https://expense-tracker-fullstack-sni7.onrender.com/groups", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -22,7 +22,7 @@ const fetchMembers = async () => {
   const token = localStorage.getItem("token");
 
   const res = await axios.get(
-    `http://localhost:8080/groups/${id}/members`,
+    `https://expense-tracker-fullstack-sni7.onrender.com/groups/${id}/members`,
     {
       headers: { Authorization: `Bearer ${token}` },
     }
@@ -35,7 +35,7 @@ const fetchExpenses = async () => {
   const token = localStorage.getItem("token");
 
   const res = await axios.get(
-    `http://localhost:8080/expenses/group/${id}`,
+    `https://expense-tracker-fullstack-sni7.onrender.com/expenses/group/${id}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -60,7 +60,7 @@ const fetchExpenses = async () => {
 
       // ✅ Fetch balances
       const balanceRes = await axios.get(
-        `http://localhost:8080/groups/${id}/balances`,
+        `https://expense-tracker-fullstack-sni7.onrender.com/groups/${id}/balances`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -70,7 +70,7 @@ const fetchExpenses = async () => {
 
       // ✅ Fetch settlements
       const settleRes = await axios.get(
-        `http://localhost:8080/groups/${id}/settle`,
+        `https://expense-tracker-fullstack-sni7.onrender.com/groups/${id}/settle`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -90,7 +90,7 @@ const fetchExpenses = async () => {
     const token = localStorage.getItem("token");
 
     await axios.post(
-      "http://localhost:8080/expenses",
+      "https://expense-tracker-fullstack-sni7.onrender.com/expenses",
       {
         amount: parseFloat(amount),
         paidByName: paidBy,
@@ -121,7 +121,7 @@ const handlePay = async (settlement) => {
     const token = localStorage.getItem("token");
 
     const res = await axios.post(
-      `http://localhost:8080/payments/create-order?amount=${settlement.amount}`,
+      `https://expense-tracker-fullstack-sni7.onrender.com/payments/create-order?amount=${settlement.amount}`,
       {},
       {
         headers: {
@@ -165,7 +165,7 @@ const verifyPayment = async (response, settlement) => {
     const token = localStorage.getItem("token");
 
     await axios.post(
-      "http://localhost:8080/payments/verify",
+      "https://expense-tracker-fullstack-sni7.onrender.com/payments/verify",
       {
         orderId: response.razorpay_order_id,
         paymentId: response.razorpay_payment_id,
