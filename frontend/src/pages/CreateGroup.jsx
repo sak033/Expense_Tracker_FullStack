@@ -3,35 +3,33 @@ import axios from "axios";
 
 export default function CreateGroup() {
   const [name, setName] = useState("");
+ const navigate = useNavigate();
 
-  const handleCreate = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const userId = localStorage.getItem("userId");
+const handleCreate = async () => {
+  try {
+    const token = localStorage.getItem("token");
 
-      await axios.post(
-        "https://expense-tracker-fullstack-sni7.onrender.com/groups",
-        {
-          name: name,
-          members: [
-            { id: parseInt(userId) } // 👈 VERY IMPORTANT
-          ]
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+    await axios.post(
+      "https://expense-tracker-fullstack-sni7.onrender.com/groups",
+      {
+        name: name
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
         }
-      );
+      }
+    );
 
-      alert("Group created ✅");
-      setName("");
+    alert("Group created ✅");
 
-    } catch (err) {
-      console.error(err);
-      alert("Error creating group ❌");
-    }
-  };
+    navigate("/dashboard"); // 👈 REDIRECT
+
+  } catch (err) {
+    console.error(err);
+    alert("Error creating group ❌");
+  }
+};
 
   return (
     <div className="p-4">
