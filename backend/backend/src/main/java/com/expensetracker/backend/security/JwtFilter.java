@@ -20,6 +20,14 @@ public class JwtFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
 
+        String path = req.getServletPath();
+
+        // 🔥 IMPORTANT FIX
+        if (path.startsWith("/auth")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         String authHeader = req.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -30,10 +38,8 @@ public class JwtFilter implements Filter {
         String token = authHeader.substring(7);
 
         try {
-            // ✅ extract email
             String email = JwtUtil.extractEmail(token);
 
-            // 🔥 ADD THIS BLOCK (IMPORTANT)
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
                             email,
