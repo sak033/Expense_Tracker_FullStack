@@ -1,5 +1,6 @@
 package com.expensetracker.backend.controller;
 
+import com.expensetracker.backend.dto.CreateGroupRequest;
 import com.expensetracker.backend.dto.GroupDTO;
 import com.expensetracker.backend.entity.*;
 import com.expensetracker.backend.repository.ExpenseRepository;
@@ -43,13 +44,14 @@ public class GroupController {
 
 
     @PostMapping
-    public Group createGroup(@RequestBody Group group) {
+    public Group createGroup(@RequestBody CreateGroupRequest req) {
 
-        // fetch users from DB using IDs
-        List<User> users = userRepository.findAllById(
-                group.getMembers().stream().map(User::getId).toList()
-        );
+        System.out.println("Incoming userIds: " + req.getUserIds());
 
+        List<User> users = userRepository.findAllById(req.getUserIds());
+
+        Group group = new Group();
+        group.setName(req.getName());
         group.setMembers(users);
 
         return groupRepository.save(group);
