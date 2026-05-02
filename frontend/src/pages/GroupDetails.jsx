@@ -52,6 +52,7 @@ const fetchExpenses = async () => {
     fetchData();
      fetchMembers();
      fetchExpenses();
+     fetchSettlements();
   }, []);
 
   const fetchData = async () => {
