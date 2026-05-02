@@ -1,9 +1,12 @@
 package com.expensetracker.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -34,4 +37,8 @@ public class User {
     @NotBlank(message = "UPI ID is required")
     @Column(nullable = false)
     private String upiId;
+
+    @JsonIgnore
+    @ManyToMany(mappedBy = "members")
+    private List<Group> groups;
 }
