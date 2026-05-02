@@ -23,7 +23,8 @@ public class JwtFilter implements Filter {
         String path = req.getServletPath();
 
         // 🔥 IMPORTANT FIX
-        if (path.startsWith("/auth")) {
+        // 🔥 allow login + register
+        if (path.startsWith("/auth") || path.startsWith("/users")) {
             chain.doFilter(request, response);
             return;
         }
