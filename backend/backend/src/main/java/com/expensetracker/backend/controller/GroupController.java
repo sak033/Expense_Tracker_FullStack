@@ -44,14 +44,19 @@ public class GroupController {
 
 
     @PostMapping
-    public Group createGroup(@RequestBody CreateGroupRequest req) {
+    public Group createGroup(@RequestBody Group group) {
 
-        System.out.println("Incoming userIds: " + req.getUserIds());
+        List<Long> ids = group.getMembers()
+                .stream()
+                .map(User::getId)
+                .toList();
 
-        List<User> users = userRepository.findAllById(req.getUserIds());
+        List<User> users = userRepository.findAllById(ids);
 
-        Group group = new Group();
-        group.setName(req.getName());
+        if (users.size() != ids.size()) {
+            throw new RuntimeException("Some users not found");
+        }
+
         group.setMembers(users);
 
         return groupRepository.save(group);
