@@ -1,18 +1,15 @@
 package com.expensetracker.backend.controller;
 
 import com.expensetracker.backend.dto.GroupDTO;
-import com.expensetracker.backend.entity.Group;
-import com.expensetracker.backend.entity.User;
+import com.expensetracker.backend.entity.*;
 import com.expensetracker.backend.repository.ExpenseRepository;
 import com.expensetracker.backend.repository.GroupRepository;
+import com.expensetracker.backend.repository.SettlementRepository;
 import com.expensetracker.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import java.util.HashMap;
-
-import com.expensetracker.backend.entity.Expense;
-import com.expensetracker.backend.entity.ExpenseSplit;
 
 import java.util.List;
 import java.util.*;
@@ -40,6 +37,10 @@ public class GroupController {
 
     @Autowired
     private ExpenseRepository expenseRepository;
+
+    @Autowired
+    private SettlementRepository settlementRepository;
+
 
     @PostMapping
     public Group createGroup(@RequestBody Group group) {
@@ -111,23 +112,22 @@ public class GroupController {
     }
 
     @GetMapping("/{groupId}/settle")
-    public List<SettlementDTO> settleBalances(@PathVariable Long groupId) {
+    public List<Settlement> settleBalances(@PathVariable Long groupId) {
+
+        // 🔥 delete old settlements
+      //  settlementRepository.deleteByGroupId(groupId);
 
         Map<String, Double> balances = getBalances(groupId);
 
         List<Map.Entry<String, Double>> creditors = new ArrayList<>();
         List<Map.Entry<String, Double>> debtors = new ArrayList<>();
 
-        // separate users
         for (Map.Entry<String, Double> entry : balances.entrySet()) {
-            if (entry.getValue() > 0) {
-                creditors.add(entry);
-            } else if (entry.getValue() < 0) {
-                debtors.add(entry);
-            }
+            if (entry.getValue() > 0) creditors.add(entry);
+            else if (entry.getValue() < 0) debtors.add(entry);
         }
 
-        List<SettlementDTO> transactions = new ArrayList<>();
+        List<Settlement> result = new ArrayList<>();
 
         int i = 0, j = 0;
 
@@ -141,7 +141,17 @@ public class GroupController {
 
             double settledAmount = Math.min(debt, credit);
 
-            transactions.add(new SettlementDTO(debtor, creditor, settledAmount));
+            // 🔥 CREATE ENTITY
+            Settlement s = new Settlement();
+            s.setFromUser(debtor);
+            s.setToUser(creditor);
+            s.setAmount(settledAmount);
+            s.setStatus("PENDING");
+            s.setGroupId(groupId);
+
+            settlementRepository.save(s); // ✅ SAVE
+
+            result.add(s);
 
             double remainingDebt = debt - settledAmount;
             double remainingCredit = credit - settledAmount;
@@ -153,7 +163,7 @@ public class GroupController {
             if (remainingCredit == 0) j++;
         }
 
-        return transactions;
+        return result;
     }
 
     @GetMapping("/{groupId}/join-link")

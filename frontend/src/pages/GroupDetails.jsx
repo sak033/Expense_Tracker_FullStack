@@ -12,6 +12,9 @@ const [amount, setAmount] = useState("");
 const [paidBy, setPaidBy] = useState("");
 const [members, setMembers] = useState([]);
 const [expenses, setExpenses] = useState([]);
+const [qrImage, setQrImage] = useState(null);
+const [showModal, setShowModal] = useState(false);
+const [currentSettlement, setCurrentSettlement] = useState(null);
 const currentUser = localStorage.getItem("name");
 
 
@@ -113,30 +116,96 @@ const fetchExpenses = async () => {
   }
 };
 
-const handlePay = async (s) => {
+const handlePay = async (settlement) => {
   try {
     const token = localStorage.getItem("token");
 
-    const res = await axios.get(
-      `http://localhost:8080/groups/${id}/payment-qr?to=${s.to}&amount=${s.amount}`,
+    const res = await axios.post(
+      `http://localhost:8080/payments/create-order?amount=${settlement.amount}`,
+      {},
       {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        responseType: "blob",
       }
     );
 
-    const imageUrl = URL.createObjectURL(res.data);
+    const options = {
+      key: "rzp_test_Sk7y3P0HIOOJbN", // your key
+      amount: settlement.amount * 100,
+      currency: "INR",
+      name: "Expense Tracker",
+      description: "Settlement Payment",
+      order_id: res.data.orderId,
 
-    window.open(imageUrl);
+      handler: function (response) {
+        console.log("Payment Success:", response);
+
+        // 👇 IMPORTANT (we use this next)
+        verifyPayment(response, settlement);
+      },
+
+      modal: {
+        ondismiss: function () {
+          console.log("Payment closed");
+        }
+      }
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.open();
 
   } catch (err) {
-    console.error("QR error", err);
+    console.error(err);
   }
 };
 
+const verifyPayment = async (response, settlement) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    await axios.post(
+      "http://localhost:8080/payments/verify",
+      {
+        orderId: response.razorpay_order_id,
+        paymentId: response.razorpay_payment_id,
+        signature: response.razorpay_signature,
+        settlementId: settlement.id
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    alert("Payment successful ✅");
+
+    // 🔥 REMOVE FROM UI (IMPORTANT)
+    setSettlements(prev =>
+      prev.filter(item => item.id !== settlement.id)
+    );
+
+  } catch (err) {
+    console.error("Verification failed", err);
+  }
+};
+const handleMarkPaid = () => {
+  setSettlements(prev =>
+    prev.filter(item =>
+      !(
+        item.from === currentSettlement.from &&
+        item.to === currentSettlement.to &&
+        item.amount === currentSettlement.amount
+      )
+    )
+  );
+
+  setShowModal(false);
+};
+
   return (
+    
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Group Details</h1>
 
@@ -227,12 +296,13 @@ const handlePay = async (s) => {
     className="p-2 bg-white rounded shadow flex justify-between items-center"
   >
     <span>
-      {s.from === currentUser ? "You" : s.from} pays {s.to === currentUser ? "You" : s.to} ₹{s.amount}
+      
+      {s.fromUser === currentUser ? "You" : s.fromUser} pays {s.toUser === currentUser ? "You" : s.toUser} ₹{s.amount}
     </span>
 
-    {s.from === currentUser && (
+    {s.fromUser === currentUser && (
   <button
-    onClick={() => handlePay(s)}
+   onClick={() => handlePay(s)}
     className="bg-green-500 text-white px-3 py-1 rounded"
   >
     Pay
@@ -261,6 +331,35 @@ const handlePay = async (s) => {
     </ul>
   )}
 </div>
+
+{showModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div className="bg-white p-6 rounded-xl shadow-lg text-center">
+      
+      <h2 className="text-lg font-semibold mb-4">
+        Scan to Pay
+      </h2>
+
+      <img
+        src={qrImage}
+        alt="QR Code"
+        className="w-64 h-64 mx-auto"
+      />
+      <button
+  onClick={handleMarkPaid}
+  className="mt-2 bg-green-500 text-white px-4 py-2 rounded"
+>
+  Mark as Paid
+</button>
+      <button
+        onClick={() => setShowModal(false)}
+        className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+)}
     </div>
   );
 }
