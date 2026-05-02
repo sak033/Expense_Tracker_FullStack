@@ -111,6 +111,9 @@ const fetchExpenses = async () => {
     setPaidBy("");
 
     fetchData(); // 🔥 refresh balances
+    fetchExpenses(); // 🔥 refresh expenses list
+    fetchSettlements(); // 🔥 refresh settlements list
+    
 
   } catch (err) {
     console.error("Error adding expense", err);
