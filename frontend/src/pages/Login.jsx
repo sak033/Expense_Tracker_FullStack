@@ -28,44 +28,70 @@ localStorage.setItem("userId", res.data.id);
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gradient-to-br from-blue-100 to-blue-200">
-      <form
-        onSubmit={handleLogin}
-        className="bg-white p-8 rounded-2xl shadow-lg w-80"
-      >
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-700">
-          Login
-        </h2>
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-200 px-4">
+    
+    <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-md">
+      
+      {/* Title */}
+      <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">
+        Welcome Back 👋
+      </h2>
+      <p className="text-center text-gray-500 mb-6 text-sm">
+        Login to your Expense Tracker
+      </p>
 
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full mb-3 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+      {/* Form */}
+      <form onSubmit={handleLogin} className="space-y-4">
 
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full mb-4 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        {/* Email */}
+        <div>
+          <label className="text-sm text-gray-600">Email</label>
+          <input
+            type="email"
+            placeholder="Enter your email"
+            className="w-full mt-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
 
+        {/* Password */}
+        <div>
+          <label className="text-sm text-gray-600">Password</label>
+          <input
+            type="password"
+            placeholder="Enter your password"
+            className="w-full mt-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+
+        {/* Button */}
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition"
+          className="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition duration-200"
         >
           Login
         </button>
-        <p
-  className="text-sm text-center mt-3 text-blue-500 cursor-pointer"
-  onClick={() => navigate("/register")}
->
-  Create Account
-</p>
       </form>
+
+      {/* Divider */}
+      <div className="flex items-center my-5">
+        <div className="flex-1 h-px bg-gray-300"></div>
+        <span className="px-2 text-gray-400 text-sm">or</span>
+        <div className="flex-1 h-px bg-gray-300"></div>
+      </div>
+
+      {/* Register */}
+      <p
+        className="text-center text-sm text-blue-500 cursor-pointer hover:underline"
+        onClick={() => navigate("/register")}
+      >
+        Create a new account
+      </p>
+
     </div>
-  );
+  </div>
+);
 }
