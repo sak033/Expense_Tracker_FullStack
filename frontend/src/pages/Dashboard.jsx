@@ -12,26 +12,7 @@ const [loading, setLoading] = useState(true);
     fetchGroups();
   }, []);
 
-  const fetchGroups = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      
-      console.log("TOKEN:", token); 
-      const res = await axios.get("https://expense-tracker-fullstack-sni7.onrender.com/groups", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-     
-
-      setGroups(res.data);
-    } catch (err) {
-      console.error("Error fetching groups", err);
-    }
-  };
-
-  const fetchGroups = async () => {
+   const fetchGroups = async () => {
   try {
     const token = localStorage.getItem("token");
 
@@ -52,6 +33,8 @@ const [loading, setLoading] = useState(true);
   }
 };
 
+
+ 
  return (
   <div className="min-h-screen bg-gray-100 px-6 py-6">
 
