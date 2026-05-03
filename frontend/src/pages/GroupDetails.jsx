@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 export default function GroupDetails() {
   const { id } = useParams();
@@ -8,381 +9,296 @@ export default function GroupDetails() {
   const [balances, setBalances] = useState({});
   const [settlements, setSettlements] = useState([]);
   const [showForm, setShowForm] = useState(false);
-const [amount, setAmount] = useState("");
-const [paidBy, setPaidBy] = useState("");
-const [members, setMembers] = useState([]);
-const [expenses, setExpenses] = useState([]);
-const [qrImage, setQrImage] = useState(null);
-const [showModal, setShowModal] = useState(false);
-const [currentSettlement, setCurrentSettlement] = useState(null);
-const currentUser = localStorage.getItem("name");
+  const [amount, setAmount] = useState("");
+  const [paidBy, setPaidBy] = useState("");
+  const [members, setMembers] = useState([]);
+  const [expenses, setExpenses] = useState([]);
 
+  const currentUser = localStorage.getItem("name");
 
-const fetchMembers = async () => {
-  const token = localStorage.getItem("token");
+  // ---------------- FETCH ----------------
 
-  const res = await axios.get(
-    `https://expense-tracker-fullstack-sni7.onrender.com/groups/${id}/members`,
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    }
-  );
+  const fetchMembers = async () => {
+    const token = localStorage.getItem("token");
+    const res = await axios.get(
+      `https://expense-tracker-fullstack-sni7.onrender.com/groups/${id}/members`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setMembers(res.data);
+  };
 
-  setMembers(res.data);
-};
-
-const fetchExpenses = async () => {
-  const token = localStorage.getItem("token");
-
-  const res = await axios.get(
-    `https://expense-tracker-fullstack-sni7.onrender.com/expenses/group/${id}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-
-  setExpenses(res.data);
-};
-
-
-
-  useEffect(() => {
-    fetchData();
-     fetchMembers();
-     fetchExpenses();
-     
-  }, []);
+  const fetchExpenses = async () => {
+    const token = localStorage.getItem("token");
+    const res = await axios.get(
+      `https://expense-tracker-fullstack-sni7.onrender.com/expenses/group/${id}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setExpenses(res.data);
+  };
 
   const fetchData = async () => {
     try {
       const token = localStorage.getItem("token");
 
-      // ✅ Fetch balances
       const balanceRes = await axios.get(
         `https://expense-tracker-fullstack-sni7.onrender.com/groups/${id}/balances`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // ✅ Fetch settlements
       const settleRes = await axios.get(
         `https://expense-tracker-fullstack-sni7.onrender.com/groups/${id}/settle`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       setBalances(balanceRes.data);
       setSettlements(settleRes.data);
     } catch (err) {
-      console.error("Error fetching group data", err);
+      console.error(err);
     }
   };
 
+  useEffect(() => {
+    fetchData();
+    fetchMembers();
+    fetchExpenses();
+  }, []);
+
+  // ---------------- ACTIONS ----------------
+
   const handleAddExpense = async () => {
-  try {
-    const token = localStorage.getItem("token");
+    try {
+      const token = localStorage.getItem("token");
 
-    await axios.post(
-      "https://expense-tracker-fullstack-sni7.onrender.com/expenses",
-      {
-        amount: parseFloat(amount),
-        paidByName: paidBy,
-        groupId: id,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      await axios.post(
+        "https://expense-tracker-fullstack-sni7.onrender.com/expenses",
+        {
+          amount: parseFloat(amount),
+          paidByName: paidBy,
+          groupId: id,
         },
-      }
-    );
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-    alert("Expense added");
+      toast.success("Expense added");
 
-    setShowForm(false);
-    setAmount("");
-    setPaidBy("");
+      setShowForm(false);
+      setAmount("");
+      setPaidBy("");
 
-    fetchData(); // 🔥 refresh balances
-    fetchExpenses(); // 🔥 refresh expenses list
-    fetchSettlements(); // 🔥 refresh settlements list
-
-
-  } catch (err) {
-    console.error("Error adding expense", err);
-  }
-};
-
-const handlePay = async (amount, settlementId) => {
-  try {
-    const token = localStorage.getItem("token");
-
-    // 🔥 Step 1: create order
-    const res = await axios.post(
-      `https://expense-tracker-fullstack-sni7.onrender.com/payments/create-order?amount=${amount}`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    const { orderId, amount: amt } = res.data;
-
-    // 🔥 Step 2: Razorpay options
-    const options = {
-      key: "rzp_test_Sk7y3P0HIOOJbN", // 👈 replace with your Razorpay key
-      amount: amt * 100,
-      currency: "INR",
-      name: "Expense Tracker",
-      description: "Settlement Payment",
-      order_id: orderId,
-
-      // 👉 THIS IS WHERE YOUR HANDLER GOES
-      handler: async function (response) {
-
-  await axios.post(
-    "https://expense-tracker-fullstack-sni7.onrender.com/payments/verify",
-    {
-      razorpay_order_id: response.razorpay_order_id,
-      razorpay_payment_id: response.razorpay_payment_id,
-      razorpay_signature: response.razorpay_signature,
-      settlementId: settlementId
+      fetchData();
+      fetchExpenses();
+    } catch (err) {
+      toast.error("Error adding expense");
     }
-  );
+  };
 
-  alert("Payment successful ✅");
+  const handlePay = async (amount, settlementId) => {
+    try {
+      const token = localStorage.getItem("token");
 
-  fetchData(); // ✅ correct refresh
-},
+      const res = await axios.post(
+        `https://expense-tracker-fullstack-sni7.onrender.com/payments/create-order?amount=${amount}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-      theme: {
-        color: "#3399cc",
-      },
-    };
+      const { orderId, amount: amt } = res.data;
 
-    // 🔥 Step 3: open popup
-    const rzp = new window.Razorpay(options);
-    rzp.open();
+      const options = {
+        key: "rzp_test_Sk7y3P0HIOOJbN",
+        amount: amt * 100,
+        currency: "INR",
+        name: "Expense Tracker",
+        description: "Settlement Payment",
+        order_id: orderId,
 
-  } catch (err) {
-    console.error(err);
-    alert("Payment failed ❌");
-  }
-};
+        handler: async function (response) {
+          await axios.post(
+            "https://expense-tracker-fullstack-sni7.onrender.com/payments/verify",
+            {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              settlementId: settlementId,
+            }
+          );
 
-
-const handleMarkPaid = () => {
-  setSettlements(prev =>
-    prev.filter(item =>
-      !(
-        item.from === currentSettlement.from &&
-        item.to === currentSettlement.to &&
-        item.amount === currentSettlement.amount
-      )
-    )
-  );
-
-  setShowModal(false);
-};
-const addMember = async () => {
-  try {
-    const token = localStorage.getItem("token");
-
-    const userId = prompt("Enter user ID to add:");
-
-    await axios.post(
-      `https://expense-tracker-fullstack-sni7.onrender.com/groups/${id}/add-member/${userId}`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
+          toast.success("Payment successful");
+          fetchData();
         },
-      }
-    );
+      };
 
-    alert("Member added ✅");
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      toast.error("Payment failed");
+    }
+  };
 
-    fetchMembers(); // refresh UI
+  const addMember = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const userId = prompt("Enter user ID:");
 
-  } catch (err) {
-    console.error(err);
-    alert("Error adding member ❌");
-  }
-};
+      await axios.post(
+        `https://expense-tracker-fullstack-sni7.onrender.com/groups/${id}/add-member/${userId}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
+      toast.success("Member added");
+      fetchMembers();
+    } catch {
+      toast.error("Error adding member");
+    }
+  };
+
+  // ---------------- UI ----------------
 
   return (
-    
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Group Details</h1>
+    <div className="min-h-screen bg-gray-100 px-6 py-6 max-w-5xl mx-auto">
 
-      <button
-  onClick={() => setShowForm(true)}
-  className="mb-4 bg-blue-500 text-white px-4 py-2 rounded"
->
-  + Add Expense
-</button>
-{showForm && (
-  <div className="mb-6 bg-white p-4 rounded shadow">
-    <input
-      type="number"
-      placeholder="Amount"
-      className="w-full mb-2 p-2 border rounded"
-      value={amount}
-      onChange={(e) => setAmount(e.target.value)}
-    />
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-800">
+          Group Details
+        </h1>
 
-    <select
-  className="w-full mb-2 p-2 border rounded"
-  value={paidBy}
-  onChange={(e) => setPaidBy(e.target.value)}
->
-  <option value="">Select payer</option>
-  {members.map((user) => (
-    <option key={user.id} value={user.name}>
-      {user.name}
-    </option>
-  ))}
-</select>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowForm(true)}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600"
+          >
+            + Expense
+          </button>
 
-    <button
-      onClick={handleAddExpense}
-      className="bg-green-500 text-white px-4 py-2 rounded"
-    >
-      Submit
-    </button>
-  </div>
-)}
+          <button
+            onClick={addMember}
+            className="bg-purple-500 text-white px-4 py-2 rounded-lg shadow hover:bg-purple-600"
+          >
+            + Member
+          </button>
+        </div>
+      </div>
 
-<button
-  onClick={addMember}
-  className="mb-4 bg-purple-500 text-white px-4 py-2 rounded"
->
-  + Add Member
-</button>
+      {/* ADD EXPENSE MODAL */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-xl shadow-lg w-96">
+            <h2 className="text-lg font-semibold mb-4">Add Expense</h2>
 
-      {/* 🔥 BALANCES */}
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold mb-2">Balances</h2>
+            <input
+              type="number"
+              placeholder="Amount"
+              className="w-full mb-3 p-3 border rounded-lg"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
 
-        {Object.keys(balances).length === 0 ? (
-          <p>No data</p>
-        ) : (
-          <ul className="space-y-2">
-            {Object.entries(balances).map(([name, amount]) => (
-              <li
-                key={name}
-                className="p-2 bg-white rounded shadow flex justify-between"
+            <select
+              className="w-full mb-4 p-3 border rounded-lg"
+              value={paidBy}
+              onChange={(e) => setPaidBy(e.target.value)}
+            >
+              <option value="">Select payer</option>
+              {members.map((user) => (
+                <option key={user.id} value={user.name}>
+                  {user.name}
+                </option>
+              ))}
+            </select>
+
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowForm(false)}
+                className="px-4 py-2 bg-gray-300 rounded"
               >
-                <span>{name === currentUser ? "You" : name}</span>
-                <span
-                  className={
-                    amount > 0
-                      ? "text-green-600"
-                      : amount < 0
-                      ? "text-red-600"
-                      : ""
-                  }
-                >
-                  {amount > 0
-  ? `gets ₹${amount}`
-  : amount < 0
-  ? `owes ₹${Math.abs(amount)}`
-  : "settled"}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+                Cancel
+              </button>
 
-      {/* 🔥 SETTLEMENT */}
-      <div>
-        <h2 className="text-lg font-semibold mb-2">Settlement</h2>
-
-        {settlements.length === 0 ? (
-          <p>No settlements</p>
-        ) : (
-          <ul className="space-y-2">
-            {settlements.map((s, index) => (
-  <li
-    key={index}
-    className="p-2 bg-white rounded shadow flex justify-between items-center"
-  >
-    <span>
-      
-      {s.fromUser === currentUser ? "You" : s.fromUser} pays {s.toUser === currentUser ? "You" : s.toUser} ₹{s.amount}
-    </span>
-
-    {s.fromUser === currentUser && (
-  <button
-   onClick={() => handlePay(s.amount, s.id)}
-    className="bg-green-500 text-white px-3 py-1 rounded"
-  >
-    Pay
-  </button>
-)}
-  </li>
-))}
-          </ul>
-        )}
-      </div>
-
-      <div className="mt-6">
-  <h2 className="text-lg font-semibold mb-2">Expenses</h2>
-
-  {expenses.length === 0 ? (
-    <p>No expenses yet</p>
-  ) : (
-    <ul className="space-y-2">
-      {expenses.map((exp) => (
-        <li key={exp.id} className="p-3 bg-white rounded shadow">
-          <div className="font-medium">
-            ₹{exp.amount} paid by {exp.paidBy.name}
+              <button
+                onClick={handleAddExpense}
+                className="px-4 py-2 bg-green-500 text-white rounded"
+              >
+                Add
+              </button>
+            </div>
           </div>
-        </li>
-      ))}
-    </ul>
-  )}
-</div>
+        </div>
+      )}
 
-{showModal && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-    <div className="bg-white p-6 rounded-xl shadow-lg text-center">
-      
-      <h2 className="text-lg font-semibold mb-4">
-        Scan to Pay
-      </h2>
+      {/* BALANCES */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold mb-3">Balances</h2>
 
-      <img
-        src={qrImage}
-        alt="QR Code"
-        className="w-64 h-64 mx-auto"
-      />
-      <button
-  onClick={handleMarkPaid}
-  className="mt-2 bg-green-500 text-white px-4 py-2 rounded"
->
-  Mark as Paid
-</button>
-      <button
-        onClick={() => setShowModal(false)}
-        className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
-      >
-        Close
-      </button>
-    </div>
-  </div>
-)}
+        {Object.entries(balances).map(([name, amount]) => (
+          <div
+            key={name}
+            className="bg-white rounded-xl shadow p-4 flex justify-between mb-2"
+          >
+            <span>{name === currentUser ? "You" : name}</span>
+
+            <span
+              className={
+                amount > 0
+                  ? "text-green-600"
+                  : amount < 0
+                  ? "text-red-600"
+                  : "text-gray-500"
+              }
+            >
+              {amount > 0
+                ? `gets ₹${amount}`
+                : amount < 0
+                ? `owes ₹${Math.abs(amount)}`
+                : "settled"}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* SETTLEMENT */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold mb-3">Settlements</h2>
+
+        {settlements.map((s, i) => (
+          <div
+            key={i}
+            className="bg-white rounded-xl shadow p-4 flex justify-between items-center mb-2"
+          >
+            <span>
+              {s.fromUser === currentUser ? "You" : s.fromUser} pays{" "}
+              {s.toUser === currentUser ? "You" : s.toUser} ₹{s.amount}
+            </span>
+
+            {s.fromUser === currentUser && (
+              <button
+                onClick={() => handlePay(s.amount, s.id)}
+                className="bg-green-500 text-white px-4 py-1 rounded-lg"
+              >
+                Pay
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* EXPENSES */}
+      <div>
+        <h2 className="text-xl font-semibold mb-3">Expenses</h2>
+
+        {expenses.map((exp) => (
+          <div
+            key={exp.id}
+            className="bg-white rounded-xl shadow p-4 mb-2"
+          >
+            <p className="font-medium">₹{exp.amount}</p>
+            <p className="text-sm text-gray-500">
+              Paid by {exp.paidBy.name}
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
