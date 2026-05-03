@@ -35,61 +35,94 @@ console.log("Register clicked");
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gradient-to-br from-green-100 to-green-200">
-      <form
-        onSubmit={handleRegister}
-        className="bg-white p-8 rounded-2xl shadow-lg w-80"
-      >
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-700">
-          Register
-        </h2>
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-green-200 px-4">
+    
+    <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-md">
+      
+      {/* Title */}
+      <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">
+        Create Account 🚀
+      </h2>
+      <p className="text-center text-gray-500 mb-6 text-sm">
+        Start managing your expenses smartly
+      </p>
 
-        <input
-          type="text"
-          placeholder="Name"
-          className="w-full mb-3 p-2 border rounded-lg"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+      {/* Form */}
+      <form onSubmit={handleRegister} className="space-y-4">
 
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full mb-3 p-2 border rounded-lg"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        {/* Name */}
+        <div>
+          <label className="text-sm text-gray-600">Full Name</label>
+          <input
+            type="text"
+            placeholder="Enter your name"
+            className="w-full mt-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 transition"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
 
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full mb-3 p-2 border rounded-lg"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        {/* Email */}
+        <div>
+          <label className="text-sm text-gray-600">Email</label>
+          <input
+            type="email"
+            placeholder="Enter your email"
+            className="w-full mt-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 transition"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
 
-        <input
-          type="text"
-          placeholder="UPI ID"
-          className="w-full mb-4 p-2 border rounded-lg"
-          value={upiId}
-          onChange={(e) => setUpiId(e.target.value)}
-        />
+        {/* Password */}
+        <div>
+          <label className="text-sm text-gray-600">Password</label>
+          <input
+            type="password"
+            placeholder="Enter your password"
+            className="w-full mt-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 transition"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
 
+        {/* UPI */}
+        <div>
+          <label className="text-sm text-gray-600">UPI ID</label>
+          <input
+            type="text"
+            placeholder="example@upi"
+            className="w-full mt-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 transition"
+            value={upiId}
+            onChange={(e) => setUpiId(e.target.value)}
+          />
+        </div>
+
+        {/* Button */}
         <button
           type="submit"
-          className="w-full bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
+          className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition duration-200"
         >
           Register
         </button>
-
-        <p
-          className="text-sm text-center mt-3 text-blue-500 cursor-pointer"
-          onClick={() => navigate("/")}
-        >
-          Already have an account? Login
-        </p>
       </form>
+
+      {/* Divider */}
+      <div className="flex items-center my-5">
+        <div className="flex-1 h-px bg-gray-300"></div>
+        <span className="px-2 text-gray-400 text-sm">or</span>
+        <div className="flex-1 h-px bg-gray-300"></div>
+      </div>
+
+      {/* Login */}
+      <p
+        className="text-center text-sm text-blue-500 cursor-pointer hover:underline"
+        onClick={() => navigate("/")}
+      >
+        Already have an account? Login
+      </p>
+
     </div>
-  );
+  </div>
+);
 }
