@@ -273,31 +273,44 @@ export default function GroupDetails() {
         ))}
       </div>
 
-      {/* SETTLEMENT */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-3">Settlements</h2>
+   {/* SETTLEMENTS */}
+<div className="mb-8">
+  <h2 className="text-2xl font-bold text-gray-800 mb-4">
+    Settlements
+  </h2>
 
-        {settlements.map((s, i) => (
-          <div
-            key={s.id}
-            className="bg-white rounded-xl shadow p-4 flex justify-between items-center mb-2"
+  {settlements.length === 0 ? (
+    <div className="bg-white rounded-2xl shadow-sm p-5 text-gray-500">
+      All balances settled 🎉
+    </div>
+  ) : (
+    settlements.map((s) => (
+      <div
+        key={s.id}
+        className="bg-white rounded-2xl shadow-sm p-5 flex items-center justify-between mb-3"
+      >
+        <div>
+          <p className="text-gray-800 font-medium">
+            {s.from === currentUser ? "You" : s.from}
+            {" pays "}
+            {s.to === currentUser ? "You" : s.to}
+            {" ₹"}
+            {s.amount}
+          </p>
+        </div>
+
+        {s.from === currentUser && (
+          <button
+            onClick={() => handlePay(s.amount, s.id)}
+            className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-xl font-medium transition"
           >
-            <span>
-              {s.fromUser === currentUser ? "You" : s.fromUser} pays{" "}
-              {s.toUser === currentUser ? "You" : s.toUser} ₹{s.amount}
-            </span>
-
-            {s.fromUser === currentUser && (
-              <button
-                onClick={() => handlePay(s.amount, s.id)}
-                className="bg-green-500 text-white px-4 py-1 rounded-lg"
-              >
-                Pay
-              </button>
-            )}
-          </div>
-        ))}
+            Pay
+          </button>
+        )}
       </div>
+    ))
+  )}
+</div>
 
       {/* EXPENSES */}
       <div>
