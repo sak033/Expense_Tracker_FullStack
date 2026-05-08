@@ -119,7 +119,7 @@ public class GroupController {
     }
 
     @GetMapping("/{groupId}/settle")
-    public List<Settlement> settleBalances(@PathVariable Long groupId) {
+    public List<SettlementDTO> settleBalances(@PathVariable Long groupId) {
 
         // 🔥 delete old settlements
       //  settlementRepository.deleteByGroupId(groupId);
@@ -134,7 +134,7 @@ public class GroupController {
             else if (entry.getValue() < 0) debtors.add(entry);
         }
 
-        List<Settlement> result = new ArrayList<>();
+        List<SettlementDTO> result = new ArrayList<>();
 
         int i = 0, j = 0;
 
@@ -147,19 +147,13 @@ public class GroupController {
             double credit = creditors.get(j).getValue();
 
             double settledAmount = Math.min(debt, credit);
-
-            // 🔥 CREATE ENTITY
-            Settlement s = new Settlement();
-            s.setFromUser(debtor);
-            s.setToUser(creditor);
-            s.setAmount(settledAmount);
-            s.setStatus("PENDING");
-            s.setGroupId(groupId);
-
-            settlementRepository.save(s); // ✅ SAVE
+            SettlementDTO s = new SettlementDTO(
+                    debtor,
+                    creditor,
+                    settledAmount
+            );
 
             result.add(s);
-
             double remainingDebt = debt - settledAmount;
             double remainingCredit = credit - settledAmount;
 
