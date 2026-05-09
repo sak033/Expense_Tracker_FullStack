@@ -74,6 +74,7 @@ public class GroupController {
                 .toList();
     }
 
+
     @GetMapping("/{groupId}/balances")
     public Map<String, Double> getBalances(@PathVariable Long groupId) {
 
@@ -81,12 +82,12 @@ public class GroupController {
 
         Map<Long, Double> balanceMap = new HashMap<>();
 
-        // Step 1: initialize all users with 0
+        // Step 1: initialize users
         for (User user : group.getMembers()) {
             balanceMap.put(user.getId(), 0.0);
         }
 
-        // Step 2: get all expenses
+        // Step 2: calculate from expenses
         List<Expense> expenses = expenseRepository.findAll();
 
         for (Expense expense : expenses) {
@@ -95,28 +96,71 @@ public class GroupController {
 
             double total = expense.getAmount();
 
-            // Step 3: add full amount to payer
+            // payer gets credit
             Long paidById = expense.getPaidBy().getId();
-            balanceMap.put(paidById,
-                    balanceMap.get(paidById) + total);
 
-            // Step 4: subtract each user's share
+            balanceMap.put(
+                    paidById,
+                    balanceMap.get(paidById) + total
+            );
+
+            // split deductions
             for (ExpenseSplit split : expense.getSplits()) {
+
                 Long userId = split.getUser().getId();
-                balanceMap.put(userId,
-                        balanceMap.get(userId) - split.getAmountOwed());
+
+                balanceMap.put(
+                        userId,
+                        balanceMap.get(userId) - split.getAmountOwed()
+                );
             }
         }
 
-        // Step 5: convert to name → balance
+        // Step 3: subtract PAID settlements
+        List<Settlement> paidSettlements =
+                settlementRepository.findByGroupIdAndStatus(groupId, "PAID");
+
+        for (Settlement settlement : paidSettlements) {
+
+            User fromUser = userRepository
+                    .findByName(settlement.getFromUser())
+                    .orElseThrow();
+
+            User toUser = userRepository
+                    .findByName(settlement.getToUser())
+                    .orElseThrow();
+
+            double amount = settlement.getAmount();
+
+            // debtor paid money
+            balanceMap.put(
+                    fromUser.getId(),
+                    balanceMap.get(fromUser.getId()) + amount
+            );
+
+            // creditor received money
+            balanceMap.put(
+                    toUser.getId(),
+                    balanceMap.get(toUser.getId()) - amount
+            );
+        }
+
+        // Step 4: convert id -> name
         Map<String, Double> result = new HashMap<>();
 
         for (User user : group.getMembers()) {
-            result.put(user.getName(), balanceMap.get(user.getId()));
+
+            result.put(
+                    user.getName(),
+                    balanceMap.get(user.getId())
+            );
         }
 
         return result;
     }
+
+
+       
 
     @GetMapping("/{groupId}/settle")
     public List<SettlementDTO> settleBalances(@PathVariable Long groupId) {
