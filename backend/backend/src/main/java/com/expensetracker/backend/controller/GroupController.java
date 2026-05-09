@@ -132,16 +132,14 @@ public class GroupController {
 
             double amount = settlement.getAmount();
 
-            // debtor paid money
             balanceMap.put(
                     fromUser.getId(),
-                    balanceMap.get(fromUser.getId()) + amount
+                    balanceMap.getOrDefault(fromUser.getId(), 0.0) + amount
             );
 
-            // creditor received money
             balanceMap.put(
                     toUser.getId(),
-                    balanceMap.get(toUser.getId()) - amount
+                    balanceMap.getOrDefault(toUser.getId(), 0.0) - amount
             );
         }
 
@@ -160,7 +158,7 @@ public class GroupController {
     }
 
 
-       
+
 
     @GetMapping("/{groupId}/settle")
     public List<SettlementDTO> settleBalances(@PathVariable Long groupId) {
