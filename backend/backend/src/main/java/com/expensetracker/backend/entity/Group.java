@@ -20,6 +20,9 @@ public class Group {
 
     private String name;
 
+    private String imageUrl;
+
+
     @ManyToMany
     @JoinTable(
             name = "group_members",
