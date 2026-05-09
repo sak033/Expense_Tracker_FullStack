@@ -122,7 +122,7 @@ public class GroupController {
     public List<SettlementDTO> settleBalances(@PathVariable Long groupId) {
 
         // 🔥 delete old settlements
-       settlementRepository.deleteByGroupId(groupId);
+       //settlementRepository.deleteByGroupId(groupId);
 
         Map<String, Double> balances = getBalances(groupId);
 
@@ -147,15 +147,33 @@ public class GroupController {
             double credit = creditors.get(j).getValue();
 
             double settledAmount = Math.min(debt, credit);
-            Settlement settlement = new Settlement();
+            Optional<Settlement> existing =
+                    settlementRepository
+                            .findByGroupIdAndFromUserAndToUserAndStatus(
+                                    groupId,
+                                    debtor,
+                                    creditor,
+                                    "PENDING"
+                            );
 
-            settlement.setFromUser(debtor);
-            settlement.setToUser(creditor);
-            settlement.setAmount(settledAmount);
-            settlement.setStatus("PENDING");
-            settlement.setGroupId(groupId);
+            Settlement savedSettlement;
 
-            Settlement savedSettlement = settlementRepository.save(settlement);
+            if (existing.isPresent()) {
+
+                savedSettlement = existing.get();
+
+            } else {
+
+                Settlement settlement = new Settlement();
+
+                settlement.setFromUser(debtor);
+                settlement.setToUser(creditor);
+                settlement.setAmount(settledAmount);
+                settlement.setStatus("PENDING");
+                settlement.setGroupId(groupId);
+
+                savedSettlement = settlementRepository.save(settlement);
+            }
 
             SettlementDTO s = new SettlementDTO(
                     savedSettlement.getId(),

@@ -4,6 +4,7 @@ import com.expensetracker.backend.entity.Settlement;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,4 +16,13 @@ public interface SettlementRepository extends JpaRepository<Settlement, Long> {
     @Modifying
     @Transactional
     void deleteByGroupId(Long groupId);
+
+    Optional<Settlement>
+    findByGroupIdAndFromUserAndToUserAndStatus(
+            Long groupId,
+            String fromUser,
+            String toUser,
+            String status
+    );
 }
+
