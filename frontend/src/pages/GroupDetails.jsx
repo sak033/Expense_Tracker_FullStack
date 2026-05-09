@@ -313,21 +313,28 @@ export default function GroupDetails() {
 </div>
 
       {/* EXPENSES */}
-      <div>
-        <h2 className="text-xl font-semibold mb-3">Expenses</h2>
+<div>
+  <h2 className="text-xl font-semibold mb-3">Expenses</h2>
 
-        {expenses.map((exp) => (
-          <div
-            key={exp.id}
-            className="bg-white rounded-xl shadow p-4 mb-2"
-          >
-            <p className="font-medium">₹{exp.amount}</p>
-            <p className="text-sm text-gray-500">
-              Paid by {exp.paidBy.name}
-            </p>
-          </div>
-        ))}
+  <div className="max-h-[400px] overflow-y-auto pr-2 space-y-3">
+
+    {expenses.map((exp) => (
+      <div
+        key={exp.id}
+        className="bg-white rounded-xl shadow p-4"
+      >
+        <p className="font-medium text-lg">
+          ₹{exp.amount}
+        </p>
+
+        <p className="text-sm text-gray-500 mt-1">
+          Paid by {exp.paidBy.name}
+        </p>
       </div>
+    ))}
+
+  </div>
+</div>
     </div>
   );
 }
