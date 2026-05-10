@@ -40,31 +40,32 @@ const [loading, setLoading] = useState(true);
     <div className="max-w-7xl mx-auto">
 
     {/* HEADER */}
-<div className="flex items-center justify-between mb-8">
+{/* HEADER */}
+<div className="flex items-start justify-between mb-10">
 
   {/* LEFT */}
   <div>
-    <p className="text-sm text-gray-500 font-medium">
+    <p className="text-sm text-gray-500 font-medium mb-1">
       Welcome back 👋
     </p>
 
-    <h1 className="text-4xl font-extrabold text-gray-800 tracking-tight">
+    <h1 className="text-5xl font-black text-gray-900 tracking-tight leading-none">
       {localStorage.getItem("name")}
     </h1>
   </div>
 
   {/* RIGHT */}
-  <div className="flex items-center gap-3">
+  <div className="flex items-center gap-4">
 
-    {/* PROFILE */}
-    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-bold shadow-lg">
+    {/* PROFILE ICON */}
+    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-xl font-bold shadow-lg">
       {localStorage.getItem("name")?.charAt(0)}
     </div>
 
     {/* BUTTON */}
     <button
       onClick={() => navigate("/create-group")}
-      className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-5 py-3 rounded-2xl shadow-lg hover:scale-105 hover:shadow-2xl transition duration-300 font-semibold"
+      className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-2xl shadow-lg hover:scale-105 hover:shadow-2xl transition duration-300 font-semibold text-lg"
     >
       + New Group
     </button>
