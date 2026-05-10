@@ -70,7 +70,8 @@ public class GroupController {
                 .map(group -> new GroupDTO(
                         group.getId(),
                         group.getName(),
-                        group.getMembers().size() // 👈 safe here
+                        group.getMembers().size(),// 👈 safe here
+                        group.getImageUrl()
                 ))
                 .toList();
     }
