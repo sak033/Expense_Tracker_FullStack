@@ -80,27 +80,47 @@ const [loading, setLoading] = useState(true);
     ) : (
 
       /* GROUP CARDS */
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {groups.map((group) => (
-          <div
-            key={group.id}
-            onClick={() => navigate(`/groups/${group.id}`)}
-            className="bg-white rounded-xl shadow-md p-5 cursor-pointer hover:shadow-lg hover:-translate-y-1 transition duration-200"
-          >
-            <h2 className="text-lg font-semibold text-gray-800">
-              {group.name}
-            </h2>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
-            <p className="text-sm text-gray-500 mt-2">
-              {group.memberCount} members
-            </p>
+  {groups.map((group) => (
 
-            <div className="mt-4 text-blue-500 text-sm font-medium">
-              View Details →
-            </div>
-          </div>
-        ))}
+    <div
+      key={group.id}
+      onClick={() => navigate(`/groups/${group.id}`)}
+      className="relative h-64 rounded-3xl overflow-hidden cursor-pointer group shadow-xl"
+    >
+
+      {/* IMAGE */}
+      <img
+        src={
+          group.imageUrl ||
+          "https://images.unsplash.com/photo-1522202176988-66273c2fd55f"
+        }
+        alt="group"
+        className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+      />
+
+      {/* OVERLAY */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+
+      {/* CONTENT */}
+      <div className="absolute bottom-0 p-5 text-white w-full">
+
+        <h2 className="text-2xl font-bold">
+          {group.name}
+        </h2>
+
+        <p className="text-sm opacity-90 mt-1">
+          {group.memberCount} members
+        </p>
+
+        <div className="mt-4 inline-flex items-center text-sm font-medium bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
+          Open Group →
+        </div>
       </div>
+    </div>
+  ))}
+</div>
     )}
 
   </div>

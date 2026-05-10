@@ -19,7 +19,8 @@ public class Group {
     private Long id;
 
     private String name;
-
+    
+    @Column(nullable = true)
     private String imageUrl;
 
 
