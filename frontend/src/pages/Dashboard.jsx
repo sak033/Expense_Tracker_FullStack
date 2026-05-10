@@ -61,16 +61,14 @@ const [loading, setLoading] = useState(true);
     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-xl font-bold shadow-lg">
       {localStorage.getItem("name")?.charAt(0)}
     </div>
-
-    {/* BUTTON */}
+</div>
+{/* BUTTON */}
     <button
       onClick={() => navigate("/create-group")}
       className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-2xl shadow-lg hover:scale-105 hover:shadow-2xl transition duration-300 font-semibold text-lg"
     >
       + New Group
     </button>
-
-  </div>
 </div>
     {/* CONTENT */}
     {loading ? (
