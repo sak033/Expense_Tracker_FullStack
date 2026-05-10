@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export default function CreateGroup() {
   const [name, setName] = useState("");
  const navigate = useNavigate();
+ const [image, setImage] = useState(null);
 
 const handleCreate = async () => {
   try {
