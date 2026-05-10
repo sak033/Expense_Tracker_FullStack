@@ -30,7 +30,7 @@ export default function CreateGroup() {
         formData.append("upload_preset", "expense_tracker_groups");
 
         const uploadRes = await axios.post(
-          "https://api.cloudinary.com/v1_1/Root/image/upload",
+          "https://api.cloudinary.com/v1_1/dqe3gchpd/image/upload",
           formData
         );
 
