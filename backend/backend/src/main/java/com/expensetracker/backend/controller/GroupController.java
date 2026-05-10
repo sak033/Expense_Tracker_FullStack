@@ -46,16 +46,17 @@ public class GroupController {
     @PostMapping
     public Group createGroup(@RequestBody Group group) {
 
+        // if no members sent
+        if (group.getMembers() == null) {
+            group.setMembers(new ArrayList<>());
+        }
+
         List<Long> ids = group.getMembers()
                 .stream()
                 .map(User::getId)
                 .toList();
 
         List<User> users = userRepository.findAllById(ids);
-
-        if (users.size() != ids.size()) {
-            throw new RuntimeException("Some users not found");
-        }
 
         group.setMembers(users);
 
