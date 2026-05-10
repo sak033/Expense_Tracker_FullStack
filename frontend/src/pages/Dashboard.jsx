@@ -36,46 +36,70 @@ const [loading, setLoading] = useState(true);
 
  
  return (
-  <div className="min-h-screen bg-gray-100 px-6 py-6">
+  <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-100 px-4 sm:px-6 py-6">
+    <div className="max-w-7xl mx-auto">
 
     {/* HEADER */}
-    <div className="flex justify-between items-center mb-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
-        <p className="text-gray-500 text-sm">
-          Welcome, {localStorage.getItem("name")}
-        </p>
-      </div>
+<div className="flex items-center justify-between mb-8">
 
-      <button
-        onClick={() => navigate("/create-group")}
-        className="bg-green-500 text-white px-4 py-2 rounded-lg shadow hover:bg-green-600 transition"
-      >
-        + New Group
-      </button>
+  {/* LEFT */}
+  <div>
+    <p className="text-sm text-gray-500 font-medium">
+      Welcome back 👋
+    </p>
+
+    <h1 className="text-4xl font-extrabold text-gray-800 tracking-tight">
+      {localStorage.getItem("name")}
+    </h1>
+  </div>
+
+  {/* RIGHT */}
+  <div className="flex items-center gap-3">
+
+    {/* PROFILE */}
+    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-bold shadow-lg">
+      {localStorage.getItem("name")?.charAt(0)}
     </div>
 
+    {/* BUTTON */}
+    <button
+      onClick={() => navigate("/create-group")}
+      className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-5 py-3 rounded-2xl shadow-lg hover:scale-105 hover:shadow-2xl transition duration-300 font-semibold"
+    >
+      + New Group
+    </button>
+
+  </div>
+</div>
     {/* CONTENT */}
     {loading ? (
-      <p className="text-gray-500">Loading groups...</p>
+      <div className="flex justify-center items-center h-[60vh]">
+  <div className="w-14 h-14 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+</div>
     ) : groups.length === 0 ? (
 
       /* EMPTY STATE */
-      <div className="text-center mt-20">
-        <h2 className="text-xl font-semibold text-gray-700">
-          No groups yet
-        </h2>
-        <p className="text-gray-500 mt-2">
-          Start by creating your first group
-        </p>
+      <div className="flex flex-col items-center justify-center mt-24 text-center">
 
-        <button
-          onClick={() => navigate("/create-group")}
-          className="mt-4 bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600"
-        >
-          Create Group
-        </button>
-      </div>
+  <div className="text-7xl mb-4">
+    🌍
+  </div>
+
+  <h2 className="text-3xl font-bold text-gray-800">
+    No groups yet
+  </h2>
+
+  <p className="text-gray-500 mt-3 max-w-sm">
+    Start tracking trips, outings, and shared expenses beautifully.
+  </p>
+
+  <button
+    onClick={() => navigate("/create-group")}
+    className="mt-8 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-8 py-3 rounded-2xl shadow-xl hover:scale-105 transition duration-300 font-semibold"
+  >
+    Create Your First Group
+  </button>
+</div>
 
     ) : (
 
@@ -122,7 +146,7 @@ const [loading, setLoading] = useState(true);
   ))}
 </div>
     )}
-
+</div>
   </div>
 );
 }
