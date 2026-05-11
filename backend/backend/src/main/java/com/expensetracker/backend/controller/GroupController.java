@@ -8,6 +8,7 @@ import com.expensetracker.backend.repository.GroupRepository;
 import com.expensetracker.backend.repository.SettlementRepository;
 import com.expensetracker.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import java.util.HashMap;
@@ -23,6 +24,8 @@ import com.google.zxing.client.j2se.MatrixToImageWriter;
 import jakarta.servlet.http.HttpServletResponse;
 
 import com.expensetracker.backend.dto.SettlementDTO;
+
+
 
 
 
@@ -44,33 +47,61 @@ public class GroupController {
 
 
     @PostMapping
-    public Group createGroup(@RequestBody Group group) {
+    public Group createGroup(
+            @RequestBody Group group,
+            Authentication authentication
+    ) {
 
-        // if no members sent
+        String email = authentication.getName();
+
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         if (group.getMembers() == null) {
             group.setMembers(new ArrayList<>());
         }
 
-        List<Long> ids = group.getMembers()
-                .stream()
-                .map(User::getId)
-                .toList();
-
-        List<User> users = userRepository.findAllById(ids);
-
-        group.setMembers(users);
+        // ADD CREATOR AUTOMATICALLY
+        group.getMembers().add(currentUser);
 
         return groupRepository.save(group);
     }
 
 
+    private void validateGroupAccess(Long groupId, Authentication authentication) {
+
+        String email = authentication.getName();
+
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
+
+        boolean isMember = group.getMembers()
+                .stream()
+                .anyMatch(user -> user.getId().equals(currentUser.getId()));
+
+        if (!isMember) {
+            throw new RuntimeException("Unauthorized access");
+        }
+    }
+
+
     @GetMapping
-    public List<GroupDTO> getAllGroups() {
-        return groupRepository.findAll().stream()
+    public List<GroupDTO> getAllGroups(Authentication authentication) {
+
+        String email = authentication.getName();
+
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return groupRepository.findByMembersContaining(currentUser)
+                .stream()
                 .map(group -> new GroupDTO(
                         group.getId(),
                         group.getName(),
-                        group.getMembers().size(),// 👈 safe here
+                        group.getMembers().size(),
                         group.getImageUrl()
                 ))
                 .toList();
@@ -78,7 +109,8 @@ public class GroupController {
 
 
     @GetMapping("/{groupId}/balances")
-    public Map<String, Double> getBalances(@PathVariable Long groupId) {
+    public Map<String, Double> getBalances(@PathVariable Long groupId, Authentication authentication) {
+        validateGroupAccess(groupId,authentication);
 
         Group group = groupRepository.findById(groupId).orElseThrow();
 
@@ -163,12 +195,14 @@ public class GroupController {
 
 
     @GetMapping("/{groupId}/settle")
-    public List<SettlementDTO> settleBalances(@PathVariable Long groupId) {
+    public List<SettlementDTO> settleBalances(@PathVariable Long groupId, Authentication authentication) {
 
+        validateGroupAccess(groupId, authentication);
         // 🔥 delete old settlements
        //settlementRepository.deleteByGroupId(groupId);
 
-        Map<String, Double> balances = getBalances(groupId);
+        Map<String, Double> balances =
+                getBalances(groupId, authentication);
 
         List<Map.Entry<String, Double>> creditors = new ArrayList<>();
         List<Map.Entry<String, Double>> debtors = new ArrayList<>();
@@ -248,7 +282,9 @@ public class GroupController {
 
 
     @GetMapping("/{groupId}/qr")
-    public void generateQR(@PathVariable Long groupId, HttpServletResponse response) {
+    public void generateQR(@PathVariable Long groupId, HttpServletResponse response, Authentication authentication) {
+
+        validateGroupAccess(groupId, authentication);
 
         try {
             String joinLink = "http://localhost:3000/join?groupId=" + groupId;
@@ -270,8 +306,9 @@ public class GroupController {
             @PathVariable Long groupId,
             @RequestParam String to,
             @RequestParam double amount,
-            HttpServletResponse response) {
+            HttpServletResponse response, Authentication authentication) {
 
+        validateGroupAccess(groupId, authentication);
         try {
             User receiver = userRepository.findByName(to)
                     .orElseThrow(() -> new RuntimeException("User not found"));
@@ -291,7 +328,9 @@ public class GroupController {
         }
     }
     @PostMapping("/{groupId}/add-member/{userId}")
-    public Group addMember(@PathVariable Long groupId, @PathVariable Long userId) {
+    public Group addMember(@PathVariable Long groupId, @PathVariable Long userId, Authentication authentication) {
+
+        validateGroupAccess(groupId, authentication);
 
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new RuntimeException("Group not found"));
@@ -308,10 +347,14 @@ public class GroupController {
     }
 
     @GetMapping("/{groupId}/members")
-    public List<User> getMembers(@PathVariable Long groupId) {
+    public List<User> getMembers(@PathVariable Long groupId, Authentication authentication) {
+
+        validateGroupAccess(groupId,authentication);
         Group group = groupRepository.findById(groupId).orElseThrow();
         return group.getMembers();
     }
+
+
 
 
 }

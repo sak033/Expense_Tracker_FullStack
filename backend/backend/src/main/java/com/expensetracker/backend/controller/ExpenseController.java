@@ -3,6 +3,7 @@ package com.expensetracker.backend.controller;
 import com.expensetracker.backend.entity.*;
 import com.expensetracker.backend.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import com.expensetracker.backend.dto.ExpenseRequestDTO;
 import java.util.List;
@@ -56,7 +57,27 @@ public class ExpenseController {
     }
 
     @GetMapping("/group/{groupId}")
-    public List<Expense> getExpensesByGroup(@PathVariable Long groupId) {
+    public List<Expense> getExpensesByGroup(
+            @PathVariable Long groupId,
+            Authentication authentication
+    ) {
+
+        String email = authentication.getName();
+
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
+
+        boolean isMember = group.getMembers()
+                .stream()
+                .anyMatch(user -> user.getId().equals(currentUser.getId()));
+
+        if (!isMember) {
+            throw new RuntimeException("Unauthorized");
+        }
+
         return expenseRepository.findAll().stream()
                 .filter(e -> e.getGroup().getId().equals(groupId))
                 .toList();
