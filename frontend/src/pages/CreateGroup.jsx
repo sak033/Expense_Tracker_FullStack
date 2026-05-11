@@ -24,7 +24,7 @@ export default function CreateGroup() {
 
       let imageUrl = "";
 
-      // Upload image to Cloudinary
+      // CLOUDINARY UPLOAD
       if (image) {
         const formData = new FormData();
 
@@ -39,7 +39,7 @@ export default function CreateGroup() {
         imageUrl = uploadRes.data.secure_url;
       }
 
-      // Create group
+      // CREATE GROUP
       await axios.post(
         "https://expense-tracker-fullstack-sni7.onrender.com/groups",
         {
@@ -54,6 +54,7 @@ export default function CreateGroup() {
       );
 
       navigate("/dashboard");
+
     } catch (err) {
       console.error(err);
       alert("Failed to create group");
@@ -63,29 +64,34 @@ export default function CreateGroup() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-950 flex items-center justify-center px-4 py-10">
+    <div className="min-h-screen bg-[#f3f4f6] flex items-center justify-center px-4 py-10">
 
-      <div className="w-full max-w-lg backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl shadow-2xl p-6 sm:p-8">
+      <div className="w-full max-w-lg bg-white rounded-[32px] shadow-xl p-6 sm:p-8">
 
         {/* HEADER */}
         <div className="text-center mb-8">
 
-          <div className="w-20 h-20 mx-auto rounded-2xl bg-blue-500/20 flex items-center justify-center mb-4 border border-blue-400/30">
-            <Users size={38} className="text-blue-300" />
+          <div className="w-20 h-20 mx-auto rounded-3xl bg-green-100 flex items-center justify-center mb-5 shadow-sm">
+
+            <Users
+              size={38}
+              className="text-green-600"
+            />
           </div>
 
-          <h1 className="text-3xl sm:text-4xl font-bold text-white">
+          <h1 className="text-3xl sm:text-4xl font-bold text-[#0f172a]">
             Create Group
           </h1>
 
-          <p className="text-gray-300 mt-2 text-sm sm:text-base">
-            Start managing expenses with your friends & family
+          <p className="text-gray-500 mt-3 text-sm sm:text-base">
+            Create a group and start tracking shared expenses
           </p>
         </div>
 
         {/* GROUP NAME */}
         <div className="mb-6">
-          <label className="block text-gray-200 mb-2 text-sm font-medium">
+
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
             Group Name
           </label>
 
@@ -94,17 +100,18 @@ export default function CreateGroup() {
             placeholder="Goa Trip"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full bg-white/10 border border-white/20 text-white placeholder-gray-400 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+            className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-800 placeholder-gray-400 outline-none focus:ring-2 focus:ring-green-400 transition"
           />
         </div>
 
         {/* IMAGE PICKER */}
-        <div className="mb-6">
-          <label className="block text-gray-200 mb-2 text-sm font-medium">
+        <div className="mb-8">
+
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
             Group Image
           </label>
 
-          <label className="flex flex-col items-center justify-center w-full h-52 border-2 border-dashed border-white/20 rounded-2xl cursor-pointer bg-white/5 hover:bg-white/10 transition overflow-hidden">
+          <label className="flex flex-col items-center justify-center w-full h-56 border-2 border-dashed border-gray-300 rounded-3xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition overflow-hidden">
 
             {preview ? (
               <img
@@ -113,13 +120,21 @@ export default function CreateGroup() {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="flex flex-col items-center text-gray-300">
-                <Upload size={40} className="mb-3" />
-                <p className="font-medium">
-                  Click to upload image
+              <div className="flex flex-col items-center text-gray-500">
+
+                <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
+                  <Upload
+                    size={28}
+                    className="text-green-600"
+                  />
+                </div>
+
+                <p className="font-semibold text-gray-700">
+                  Upload Group Image
                 </p>
+
                 <span className="text-sm text-gray-400 mt-1">
-                  PNG, JPG, JPEG
+                  PNG, JPG or JPEG
                 </span>
               </div>
             )}
@@ -144,15 +159,17 @@ export default function CreateGroup() {
         <button
           onClick={handleCreate}
           disabled={loading}
-          className={`w-full py-3 rounded-2xl font-semibold text-white transition-all duration-300 ${
+          className={`w-full py-4 rounded-2xl font-semibold text-white text-lg transition-all duration-300 shadow-lg ${
             loading
-              ? "bg-gray-600 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700 hover:scale-[1.02] active:scale-[0.98]"
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-green-500 hover:bg-green-600 hover:scale-[1.01] active:scale-[0.99]"
           }`}
         >
           {loading ? (
             <div className="flex items-center justify-center gap-2">
+
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+
               Creating Group...
             </div>
           ) : (
