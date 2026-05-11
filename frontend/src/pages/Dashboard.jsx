@@ -7,7 +7,7 @@ export default function Dashboard() {
   const [groups, setGroups] = useState([]);
 const navigate = useNavigate();
 const [loading, setLoading] = useState(true);
-
+const [showProfileMenu, setShowProfileMenu] = useState(false);
   useEffect(() => {
     fetchGroups();
   }, []);
@@ -57,11 +57,73 @@ const [loading, setLoading] = useState(true);
       </h1>
     </div>
 
-    {/* PROFILE ICON */}
-    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-xl font-bold shadow-lg">
-      {localStorage.getItem("name")?.charAt(0)}
-    </div>
+    {/* PROFILE */}
+<div className="relative">
 
+  {/* PROFILE BUTTON */}
+  <button
+    onClick={() => setShowProfileMenu(!showProfileMenu)}
+    className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 text-white flex items-center justify-center text-xl font-bold shadow-lg ring-4 ring-white hover:scale-105 transition"
+  >
+    {localStorage.getItem("name")?.charAt(0).toUpperCase()}
+
+    {/* ONLINE DOT */}
+    <div className="absolute bottom-1 right-1 w-4 h-4 bg-green-400 border-2 border-white rounded-full"></div>
+  </button>
+
+  {/* DROPDOWN */}
+  {showProfileMenu && (
+    <div className="absolute right-0 mt-3 w-64 bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden z-50 animate-in fade-in zoom-in duration-200">
+
+      {/* USER INFO */}
+      <div className="p-5 bg-gradient-to-r from-green-500 to-emerald-600 text-white">
+
+        <div className="flex items-center gap-4">
+
+          <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center text-2xl font-bold backdrop-blur-sm">
+            {localStorage.getItem("name")?.charAt(0).toUpperCase()}
+          </div>
+
+          <div>
+            <p className="font-bold text-lg">
+              {localStorage.getItem("name")}
+            </p>
+
+            <p className="text-sm text-white/80">
+              Expense Tracker User
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* MENU ITEMS */}
+      <div className="p-2">
+
+        <button
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-gray-100 transition text-gray-700 font-medium"
+        >
+          👤 Profile
+        </button>
+
+        <button
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-gray-100 transition text-gray-700 font-medium"
+        >
+          ⚙️ Settings
+        </button>
+
+        <button
+          onClick={() => {
+            localStorage.clear();
+            navigate("/login");
+          }}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-red-50 transition text-red-500 font-medium"
+        >
+          🚪 Logout
+        </button>
+      </div>
+    </div>
+  )}
+</div>
   </div>
 
   {/* BUTTON */}
