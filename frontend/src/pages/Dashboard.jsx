@@ -114,7 +114,7 @@ const [showProfileMenu, setShowProfileMenu] = useState(false);
         <button
           onClick={() => {
             localStorage.clear();
-            navigate("/login");
+            navigate("/");
           }}
           className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-red-50 transition text-red-500 font-medium"
         >
