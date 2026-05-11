@@ -171,170 +171,270 @@ export default function GroupDetails() {
 
   // ---------------- UI ----------------
 
-  return (
-    <div className="min-h-screen bg-gray-100 px-6 py-6 max-w-5xl mx-auto">
+ return (
+  <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white">
 
-      {/* HEADER */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">
+    {/* TOP HEADER */}
+    <div className="relative h-72 overflow-hidden">
+
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-700 opacity-80"></div>
+
+      <div className="absolute inset-0 backdrop-blur-sm"></div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-6 h-full flex flex-col justify-center">
+
+        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-3">
           Group Details
         </h1>
 
-        <div className="flex gap-3">
+        <p className="text-gray-200 text-lg">
+          Manage expenses, settlements & members
+        </p>
+
+        {/* ACTION BUTTONS */}
+        <div className="flex flex-wrap gap-4 mt-8">
+
           <button
             onClick={() => setShowForm(true)}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600"
+            className="bg-white text-black px-6 py-3 rounded-2xl font-semibold hover:scale-105 transition"
           >
-            + Expense
+            + Add Expense
           </button>
 
           <button
             onClick={addMember}
-            className="bg-purple-500 text-white px-4 py-2 rounded-lg shadow hover:bg-purple-600"
+            className="bg-white/10 backdrop-blur-lg border border-white/20 px-6 py-3 rounded-2xl font-semibold hover:bg-white/20 transition"
           >
-            + Member
+            + Add Member
           </button>
         </div>
       </div>
+    </div>
 
-      {/* ADD EXPENSE MODAL */}
-      {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-xl shadow-lg w-96">
-            <h2 className="text-lg font-semibold mb-4">Add Expense</h2>
+    {/* MAIN CONTENT */}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
 
-            <input
-              type="number"
-              placeholder="Amount"
-              className="w-full mb-3 p-3 border rounded-lg"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
+      {/* GRID */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            <select
-              className="w-full mb-4 p-3 border rounded-lg"
-              value={paidBy}
-              onChange={(e) => setPaidBy(e.target.value)}
-            >
-              <option value="">Select payer</option>
-              {members.map((user) => (
-                <option key={user.id} value={user.name}>
-                  {user.name}
-                </option>
+        {/* LEFT SIDE */}
+        <div className="lg:col-span-2 space-y-6">
+
+          {/* BALANCES */}
+          <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-6 shadow-2xl">
+
+            <h2 className="text-2xl font-bold mb-6">
+              Balances
+            </h2>
+
+            <div className="space-y-3">
+
+              {Object.entries(balances).map(([name, amount]) => (
+                <div
+                  key={name}
+                  className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center justify-between hover:bg-white/10 transition"
+                >
+                  <div>
+                    <p className="font-medium text-lg">
+                      {name === currentUser ? "You" : name}
+                    </p>
+                  </div>
+
+                  <div>
+                    <span
+                      className={`font-semibold text-lg ${
+                        amount > 0
+                          ? "text-green-400"
+                          : amount < 0
+                          ? "text-red-400"
+                          : "text-gray-400"
+                      }`}
+                    >
+                      {amount > 0
+                        ? `gets ₹${amount}`
+                        : amount < 0
+                        ? `owes ₹${Math.abs(amount)}`
+                        : "settled"}
+                    </span>
+                  </div>
+                </div>
               ))}
-            </select>
 
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowForm(false)}
-                className="px-4 py-2 bg-gray-300 rounded"
-              >
-                Cancel
-              </button>
+            </div>
+          </div>
 
-              <button
-                onClick={handleAddExpense}
-                className="px-4 py-2 bg-green-500 text-white rounded"
-              >
-                Add
-              </button>
+          {/* SETTLEMENTS */}
+          <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-6 shadow-2xl">
+
+            <h2 className="text-2xl font-bold mb-6">
+              Settlements
+            </h2>
+
+            {settlements.length === 0 ? (
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-8 text-center text-gray-400">
+                All balances settled 🎉
+              </div>
+            ) : (
+              <div className="space-y-4">
+
+                {settlements.map((s) => (
+                  <div
+                    key={s.id}
+                    className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:bg-white/10 transition"
+                  >
+                    <div>
+                      <p className="text-lg font-medium">
+                        {s.from === currentUser ? "You" : s.from}
+                        <span className="text-gray-400"> pays </span>
+                        {s.to === currentUser ? "You" : s.to}
+                      </p>
+
+                      <p className="text-green-400 font-bold mt-1 text-xl">
+                        ₹{s.amount}
+                      </p>
+                    </div>
+
+                    {s.from === currentUser && (
+                      <button
+                        onClick={() => handlePay(s.amount, s.id)}
+                        className="bg-green-500 hover:bg-green-600 px-6 py-3 rounded-2xl font-semibold transition hover:scale-105"
+                      >
+                        Pay Now
+                      </button>
+                    )}
+                  </div>
+                ))}
+
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* RIGHT SIDE */}
+        <div className="space-y-6">
+
+          {/* MEMBERS */}
+          <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-6 shadow-2xl">
+
+            <h2 className="text-2xl font-bold mb-6">
+              Members
+            </h2>
+
+            <div className="space-y-3">
+
+              {members.map((member) => (
+                <div
+                  key={member.id}
+                  className="bg-white/5 border border-white/10 rounded-2xl px-4 py-3 flex items-center justify-between hover:bg-white/10 transition"
+                >
+                  <p className="font-medium">
+                    {member.name}
+                  </p>
+
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center font-bold">
+                    {member.name.charAt(0).toUpperCase()}
+                  </div>
+                </div>
+              ))}
+
+            </div>
+          </div>
+
+          {/* EXPENSES */}
+          <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-6 shadow-2xl">
+
+            <h2 className="text-2xl font-bold mb-6">
+              Expenses
+            </h2>
+
+            <div className="max-h-[500px] overflow-y-auto pr-2 space-y-4">
+
+              {expenses.map((exp) => (
+                <div
+                  key={exp.id}
+                  className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition"
+                >
+                  <div className="flex items-center justify-between mb-2">
+
+                    <p className="text-2xl font-bold text-green-400">
+                      ₹{exp.amount}
+                    </p>
+
+                    <div className="text-xs bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full">
+                      Expense
+                    </div>
+                  </div>
+
+                  <p className="text-gray-300">
+                    Paid by{" "}
+                    <span className="font-semibold text-white">
+                      {exp.paidBy.name}
+                    </span>
+                  </p>
+                </div>
+              ))}
+
             </div>
           </div>
         </div>
-      )}
+      </div>
+    </div>
 
-      {/* BALANCES */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-3">Balances</h2>
+    {/* MODAL */}
+    {showForm && (
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4">
 
-        {Object.entries(balances).map(([name, amount]) => (
-          <div
-            key={name}
-            className="bg-white rounded-xl shadow p-4 flex justify-between mb-2"
+        <div className="bg-slate-900 border border-white/10 rounded-3xl p-6 w-full max-w-md shadow-2xl animate-in fade-in zoom-in duration-200">
+
+          <h2 className="text-2xl font-bold mb-6">
+            Add Expense
+          </h2>
+
+          <input
+            type="number"
+            placeholder="Enter amount"
+            className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 mb-4 outline-none focus:border-blue-500"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+          />
+
+          <select
+            className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 mb-6 outline-none focus:border-blue-500"
+            value={paidBy}
+            onChange={(e) => setPaidBy(e.target.value)}
           >
-            <span>{name === currentUser ? "You" : name}</span>
+            <option value="">Select payer</option>
 
-            <span
-              className={
-                amount > 0
-                  ? "text-green-600"
-                  : amount < 0
-                  ? "text-red-600"
-                  : "text-gray-500"
-              }
+            {members.map((user) => (
+              <option
+                key={user.id}
+                value={user.name}
+                className="text-black"
+              >
+                {user.name}
+              </option>
+            ))}
+          </select>
+
+          <div className="flex gap-3">
+
+            <button
+              onClick={() => setShowForm(false)}
+              className="flex-1 bg-white/10 hover:bg-white/20 py-3 rounded-2xl font-semibold transition"
             >
-              {amount > 0
-                ? `gets ₹${amount}`
-                : amount < 0
-                ? `owes ₹${Math.abs(amount)}`
-                : "settled"}
-            </span>
+              Cancel
+            </button>
+
+            <button
+              onClick={handleAddExpense}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 py-3 rounded-2xl font-semibold transition"
+            >
+              Add Expense
+            </button>
           </div>
-        ))}
-      </div>
-
-   {/* SETTLEMENTS */}
-<div className="mb-8">
-  <h2 className="text-2xl font-bold text-gray-800 mb-4">
-    Settlements
-  </h2>
-
-  {settlements.length === 0 ? (
-    <div className="bg-white rounded-2xl shadow-sm p-5 text-gray-500">
-      All balances settled 🎉
-    </div>
-  ) : (
-    settlements.map((s) => (
-      <div
-        key={s.id}
-        className="bg-white rounded-2xl shadow-sm p-5 flex items-center justify-between mb-3"
-      >
-        <div>
-          <p className="text-gray-800 font-medium">
-            {s.from === currentUser ? "You" : s.from}
-            {" pays "}
-            {s.to === currentUser ? "You" : s.to}
-            {" ₹"}
-            {s.amount}
-          </p>
         </div>
-
-        {s.from === currentUser && (
-          <button
-            onClick={() => handlePay(s.amount, s.id)}
-            className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-xl font-medium transition"
-          >
-            Pay
-          </button>
-        )}
       </div>
-    ))
-  )}
-</div>
-
-      {/* EXPENSES */}
-<div>
-  <h2 className="text-xl font-semibold mb-3">Expenses</h2>
-
-  <div className="max-h-[400px] overflow-y-auto pr-2 space-y-3">
-
-    {expenses.map((exp) => (
-      <div
-        key={exp.id}
-        className="bg-white rounded-xl shadow p-4"
-      >
-        <p className="font-medium text-lg">
-          ₹{exp.amount}
-        </p>
-
-        <p className="text-sm text-gray-500 mt-1">
-          Paid by {exp.paidBy.name}
-        </p>
-      </div>
-    ))}
-
+    )}
   </div>
-</div>
-    </div>
-  );
+);
 }
