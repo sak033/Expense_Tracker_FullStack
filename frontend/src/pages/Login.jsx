@@ -34,7 +34,7 @@ localStorage.setItem("userId", res.data.id);
       
       {/* Title */}
       <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">
-        Welcome Back 👋
+        Welcome Back!
       </h2>
       <p className="text-center text-gray-500 mb-6 text-sm">
         Login to your Expense Tracker

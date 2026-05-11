@@ -41,7 +41,7 @@ console.log("Register clicked");
       
       {/* Title */}
       <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">
-        Create Account 🚀
+        Create Account!
       </h2>
       <p className="text-center text-gray-500 mb-6 text-sm">
         Start managing your expenses smartly
