@@ -21,7 +21,7 @@ public class GeminiService {
         try {
 
             String endpoint =
-                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key="
+                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key="
                             + apiKey;
 
             URL url = new URL(endpoint);
