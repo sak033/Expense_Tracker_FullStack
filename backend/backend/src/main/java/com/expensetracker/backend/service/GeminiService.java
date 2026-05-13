@@ -38,7 +38,7 @@ public class GeminiService {
             ObjectMapper mapper = new ObjectMapper();
 
             Map<String, Object> bodyMap = Map.of(
-                    "model", "deepseek/deepseek-chat-v3-0324:free",
+                    "model", "meta-llama/llama-3.3-8b-instruct:free",
                     "messages", new Object[]{
                             Map.of(
                                     "role", "user",
