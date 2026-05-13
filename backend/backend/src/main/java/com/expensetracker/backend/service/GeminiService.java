@@ -3,6 +3,8 @@ package com.expensetracker.backend.service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.List;
 import java.util.Map;
 
 import java.io.OutputStream;
@@ -87,7 +89,23 @@ public class GeminiService {
 
             scanner.close();
 
-            return response.toString();
+            String json = response.toString();
+
+            
+
+            Map<?, ?> responseMap =
+                    mapper.readValue(json, Map.class);
+
+            List<?> choices =
+                    (List<?>) responseMap.get("choices");
+
+            Map<?, ?> firstChoice =
+                    (Map<?, ?>) choices.get(0);
+
+            Map<?, ?> message =
+                    (Map<?, ?>) firstChoice.get("message");
+
+            return message.get("content").toString();
 
         } catch (Exception e) {
 
