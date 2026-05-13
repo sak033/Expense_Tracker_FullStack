@@ -13,16 +13,14 @@ import java.util.Scanner;
 @Service
 public class GeminiService {
 
-    @Value("${GEMINI_API_KEY}")
+    @Value("${OPENROUTER_API_KEY}")
     private String apiKey;
 
     public String generateResponse(String prompt) {
 
         try {
 
-            String endpoint =
-                    "https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key="
-                            + apiKey;
+            String endpoint = "https://openrouter.ai/api/v1/chat/completions";
 
             URL url = new URL(endpoint);
 
@@ -30,19 +28,21 @@ public class GeminiService {
                     (HttpURLConnection) url.openConnection();
 
             conn.setRequestMethod("POST");
+
+            conn.setRequestProperty("Authorization", "Bearer " + apiKey);
+
             conn.setRequestProperty("Content-Type", "application/json");
+
             conn.setDoOutput(true);
 
             ObjectMapper mapper = new ObjectMapper();
 
             Map<String, Object> bodyMap = Map.of(
-                    "contents", new Object[]{
+                    "model", "deepseek/deepseek-chat-v3-0324:free",
+                    "messages", new Object[]{
                             Map.of(
-                                    "parts", new Object[]{
-                                            Map.of(
-                                                    "text", prompt
-                                            )
-                                    }
+                                    "role", "user",
+                                    "content", prompt
                             )
                     }
             );
@@ -50,7 +50,9 @@ public class GeminiService {
             String body = mapper.writeValueAsString(bodyMap);
 
             OutputStream os = conn.getOutputStream();
+
             os.write(body.getBytes());
+
             os.flush();
             os.close();
 
@@ -59,8 +61,11 @@ public class GeminiService {
             Scanner scanner;
 
             if (responseCode >= 200 && responseCode < 300) {
+
                 scanner = new Scanner(conn.getInputStream());
+
             } else {
+
                 scanner = new Scanner(conn.getErrorStream());
 
                 StringBuilder errorResponse = new StringBuilder();
@@ -74,8 +79,7 @@ public class GeminiService {
                 return errorResponse.toString();
             }
 
-            StringBuilder response =
-                    new StringBuilder();
+            StringBuilder response = new StringBuilder();
 
             while (scanner.hasNext()) {
                 response.append(scanner.nextLine());
@@ -86,7 +90,9 @@ public class GeminiService {
             return response.toString();
 
         } catch (Exception e) {
+
             e.printStackTrace();
+
             return "Error generating AI response";
         }
     }
