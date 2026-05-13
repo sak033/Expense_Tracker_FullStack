@@ -38,7 +38,7 @@ public class GeminiService {
             ObjectMapper mapper = new ObjectMapper();
 
             Map<String, Object> bodyMap = Map.of(
-                    "model", "meta-llama/llama-3.3-8b-instruct:free",
+                    "model", "arcee-ai/trinity-large-thinking:free",
                     "messages", new Object[]{
                             Map.of(
                                     "role", "user",
