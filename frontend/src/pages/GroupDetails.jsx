@@ -16,7 +16,8 @@ export default function GroupDetails() {
   const [expenses, setExpenses] = useState([]);
   const [aiExplanation, setAiExplanation] = useState("");
   const [loadingAI, setLoadingAI] = useState(false);
-  
+  const [followUpQuestion, setFollowUpQuestion] = useState("");
+  const [followUpResponse, setFollowUpResponse] = useState("");
 
   const currentUser = localStorage.getItem("name");
 
@@ -212,6 +213,37 @@ if (description.length > 25) {
   } finally {
 
     setLoadingAI(false);
+  }
+};
+
+
+const handleFollowUpAI = async () => {
+
+  if (!followUpQuestion.trim()) return;
+
+  try {
+
+    const token = localStorage.getItem("token");
+
+    const res = await axios.post(
+      `https://expense-tracker-fullstack-sni7.onrender.com/groups/${id}/ai-followup`,
+      {
+        question: followUpQuestion,
+        previousExplanation: aiExplanation,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    setFollowUpResponse(res.data.prompt);
+
+  } catch (err) {
+
+    console.error(err);
+    toast.error("AI follow-up failed");
   }
 };
 
@@ -426,6 +458,36 @@ if (description.length > 25) {
         {aiExplanation}
       </p>
 
+
+ <div className="mt-4 flex gap-3">
+
+  <input
+    type="text"
+    placeholder="Ask AI anything about this settlement..."
+    className="flex-1 px-4 py-3 rounded-2xl border border-gray-200 outline-none focus:ring-2 focus:ring-purple-400"
+    value={followUpQuestion}
+    onChange={(e) => setFollowUpQuestion(e.target.value)}
+  />
+
+  <button
+  onClick={handleFollowUpAI}
+  className="bg-purple-600 hover:bg-purple-700 text-white px-5 rounded-2xl font-semibold shadow-lg transition"
+>
+  Ask AI
+</button>
+
+</div>
+
+{followUpResponse && (
+
+  <div className="mt-4 bg-purple-50 border border-purple-100 rounded-2xl p-4">
+
+    <p className="text-gray-700 leading-7 whitespace-pre-line">
+      {followUpResponse}
+    </p>
+
+  </div>
+)}
     </div>
   </div>
 )}

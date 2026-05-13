@@ -1,8 +1,6 @@
 package com.expensetracker.backend.controller;
 
-import com.expensetracker.backend.dto.AIExplainDTO;
-import com.expensetracker.backend.dto.CreateGroupRequest;
-import com.expensetracker.backend.dto.GroupDTO;
+import com.expensetracker.backend.dto.*;
 import com.expensetracker.backend.entity.*;
 import com.expensetracker.backend.repository.ExpenseRepository;
 import com.expensetracker.backend.repository.GroupRepository;
@@ -25,7 +23,6 @@ import com.expensetracker.backend.entity.Expense;
 
 import jakarta.servlet.http.HttpServletResponse;
 
-import com.expensetracker.backend.dto.SettlementDTO;
 import com.expensetracker.backend.service.GeminiService;
 
 
@@ -444,6 +441,41 @@ GROUP EXPENSES:
 
         prompt.append("""
 \nNow generate a smart natural explanation of the current group situation.
+""");
+
+        String aiResponse =
+                geminiService.generateResponse(prompt.toString());
+
+        return new AIExplainDTO(aiResponse);
+    }
+
+    @PostMapping("/{groupId}/ai-followup")
+    public AIExplainDTO followUpAI(
+            @PathVariable Long groupId,
+            @RequestBody AIFollowUpDTO request,
+            Authentication authentication
+    ) {
+
+        validateGroupAccess(groupId, authentication);
+
+        StringBuilder prompt = new StringBuilder();
+
+        prompt.append("""
+You are a smart AI assistant inside an expense sharing app.
+
+Previous explanation:
+""");
+
+        prompt.append(request.getPreviousExplanation());
+
+        prompt.append("\n\nUser question:\n");
+
+        prompt.append(request.getQuestion());
+
+        prompt.append("""
+    
+Answer naturally and conversationally.
+Keep it clear and human-friendly.
 """);
 
         String aiResponse =
