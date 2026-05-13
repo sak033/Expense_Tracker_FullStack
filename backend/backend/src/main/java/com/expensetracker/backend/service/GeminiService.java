@@ -54,8 +54,25 @@ public class GeminiService {
             os.flush();
             os.close();
 
-            Scanner scanner =
-                    new Scanner(conn.getInputStream());
+            int responseCode = conn.getResponseCode();
+
+            Scanner scanner;
+
+            if (responseCode >= 200 && responseCode < 300) {
+                scanner = new Scanner(conn.getInputStream());
+            } else {
+                scanner = new Scanner(conn.getErrorStream());
+
+                StringBuilder errorResponse = new StringBuilder();
+
+                while (scanner.hasNext()) {
+                    errorResponse.append(scanner.nextLine());
+                }
+
+                scanner.close();
+
+                return errorResponse.toString();
+            }
 
             StringBuilder response =
                     new StringBuilder();
