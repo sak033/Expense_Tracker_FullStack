@@ -26,6 +26,7 @@ import com.expensetracker.backend.entity.Expense;
 import jakarta.servlet.http.HttpServletResponse;
 
 import com.expensetracker.backend.dto.SettlementDTO;
+import com.expensetracker.backend.service.GeminiService;
 
 
 
@@ -48,6 +49,9 @@ public class GroupController {
 
     @Autowired
     private SettlementRepository settlementRepository;
+
+    @Autowired
+    private GeminiService geminiService;
 
 
     @PostMapping
@@ -374,15 +378,15 @@ public class GroupController {
                 .filter(exp -> exp.getGroup().getId().equals(groupId))
                 .toList();
 
-        StringBuilder prompt = new StringBuilder();
+        StringBuilder explanation = new StringBuilder();
 
-        prompt.append("Explain the group expenses and settlements in simple English.\n\n");
+        explanation.append("Explain the group expenses and settlements in simple English.\n\n");
 
-        prompt.append("Expenses:\n");
+        explanation.append("Expenses:\n");
 
         for (Expense exp : expenses) {
 
-            prompt.append("- ")
+            explanation.append("- ")
                     .append(exp.getDescription())
                     .append(": ₹")
                     .append(exp.getAmount())
@@ -391,7 +395,10 @@ public class GroupController {
                     .append("\n");
         }
 
-        return new AIExplainDTO(prompt.toString());
+        String aiResponse =
+                geminiService.generateResponse(explanation.toString());
+
+        return new AIExplainDTO(aiResponse);
     }
 
 
