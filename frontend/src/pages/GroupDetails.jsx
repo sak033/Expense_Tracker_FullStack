@@ -396,6 +396,40 @@ if (description.length > 25) {
                   </div>
                 ))}
 
+
+
+
+                {aiExplanation && (
+
+  <div className="mt-6 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-100 rounded-3xl p-6 shadow-sm">
+
+    <div className="flex items-center gap-3 mb-4">
+
+      <div className="w-12 h-12 rounded-2xl bg-gradient-to-r from-purple-500 to-indigo-600 flex items-center justify-center text-white text-xl shadow-md">
+        ✨
+      </div>
+
+      <div>
+        <h3 className="text-xl font-bold text-[#0f172a]">
+          AI Settlement Explanation
+        </h3>
+
+        <p className="text-sm text-gray-500">
+          Generated using your expense data
+        </p>
+      </div>
+    </div>
+
+    <div className="bg-white rounded-2xl p-5 border border-purple-100">
+
+      <p className="text-gray-700 leading-7 whitespace-pre-line">
+        {aiExplanation}
+      </p>
+
+    </div>
+  </div>
+)}
+
               </div>
             )}
           </div>
