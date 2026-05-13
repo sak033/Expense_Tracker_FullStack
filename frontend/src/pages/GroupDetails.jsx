@@ -333,20 +333,8 @@ if (description.length > 25) {
               <h2 className="text-2xl font-bold text-[#0f172a]">
                 Settlements
               </h2>
-<div className="flex items-center gap-3">
-
-  <div className="bg-blue-100 text-blue-600 px-4 py-2 rounded-xl text-sm font-semibold">
-    Payments
-  </div>
-
-  <button
-    onClick={handleAIExplain}
-    disabled={loadingAI}
-    className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-md hover:scale-[1.03] transition disabled:opacity-50"
-  >
-    {loadingAI ? "Thinking..." : "✨ AI Explain"}
-  </button>
-
+              <div className="bg-blue-100 text-blue-600 px-4 py-2 rounded-xl text-sm font-semibold">
+  Payments
 </div>
             </div>
 
@@ -385,13 +373,26 @@ if (description.length > 25) {
                     </div>
 
                     {s.from === currentUser && (
-                      <button
-                        onClick={() => handlePay(s.amount, s.id)}
-                        className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-2xl font-semibold shadow-md transition hover:scale-[1.02]"
-                      >
-                        Pay Now
-                      </button>
-                    )}
+
+  <div className="flex gap-3 flex-wrap">
+
+    <button
+      onClick={() => handlePay(s.amount, s.id)}
+      className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-2xl font-semibold shadow-md transition hover:scale-[1.02]"
+    >
+      Pay Now
+    </button>
+
+    <button
+      onClick={handleAIExplain}
+      disabled={loadingAI}
+      className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold shadow-md transition hover:scale-[1.02] disabled:opacity-50"
+    >
+      {loadingAI ? "Thinking..." : "✨ Explain"}
+    </button>
+
+  </div>
+)}
                   </div>
                 ))}
 
