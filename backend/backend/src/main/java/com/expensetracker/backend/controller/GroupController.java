@@ -1,5 +1,6 @@
 package com.expensetracker.backend.controller;
 
+import com.expensetracker.backend.dto.AIExplainDTO;
 import com.expensetracker.backend.dto.CreateGroupRequest;
 import com.expensetracker.backend.dto.GroupDTO;
 import com.expensetracker.backend.entity.*;
@@ -20,6 +21,7 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.expensetracker.backend.entity.Expense;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -35,6 +37,8 @@ public class GroupController {
 
     @Autowired
     private GroupRepository groupRepository;
+
+
 
     @Autowired
     private UserRepository userRepository;
@@ -352,6 +356,42 @@ public class GroupController {
         validateGroupAccess(groupId,authentication);
         Group group = groupRepository.findById(groupId).orElseThrow();
         return group.getMembers();
+    }
+
+    @GetMapping("/{groupId}/ai-explain")
+    public AIExplainDTO generateAIExplanation(
+            @PathVariable Long groupId,
+            Authentication authentication
+    ) {
+
+        validateGroupAccess(groupId, authentication);
+
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
+
+        List<Expense> expenses = expenseRepository.findAll()
+                .stream()
+                .filter(exp -> exp.getGroup().getId().equals(groupId))
+                .toList();
+
+        StringBuilder prompt = new StringBuilder();
+
+        prompt.append("Explain the group expenses and settlements in simple English.\n\n");
+
+        prompt.append("Expenses:\n");
+
+        for (Expense exp : expenses) {
+
+            prompt.append("- ")
+                    .append(exp.getDescription())
+                    .append(": ₹")
+                    .append(exp.getAmount())
+                    .append(" paid by ")
+                    .append(exp.getPaidBy().getName())
+                    .append("\n");
+        }
+
+        return new AIExplainDTO(prompt.toString());
     }
 
 

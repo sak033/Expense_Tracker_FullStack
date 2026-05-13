@@ -27,4 +27,6 @@ public class Expense {
 
     @OneToMany(mappedBy = "expense", cascade = CascadeType.ALL)
     private List<ExpenseSplit> splits;
+
+    private String description;
 }

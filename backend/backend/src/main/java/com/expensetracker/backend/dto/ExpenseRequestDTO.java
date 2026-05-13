@@ -7,4 +7,5 @@ public class ExpenseRequestDTO {
     private double amount;
     private String paidByName;
     private Long groupId;
+    private String description;
 }

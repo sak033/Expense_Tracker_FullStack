@@ -10,9 +10,11 @@ export default function GroupDetails() {
   const [settlements, setSettlements] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [amount, setAmount] = useState("");
+  const [description, setDescription] = useState("");
   const [paidBy, setPaidBy] = useState("");
   const [members, setMembers] = useState([]);
   const [expenses, setExpenses] = useState([]);
+  
 
   const currentUser = localStorage.getItem("name");
 
@@ -69,12 +71,23 @@ export default function GroupDetails() {
     try {
       const token = localStorage.getItem("token");
 
+      if (!description.trim()) {
+  toast.error("Please enter description");
+  return;
+}
+
+if (description.length > 25) {
+  toast.error("Description too long");
+  return;
+}
+
       await axios.post(
         "https://expense-tracker-fullstack-sni7.onrender.com/expenses",
         {
           amount: parseFloat(amount),
           paidByName: paidBy,
           groupId: id,
+          description,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -84,6 +97,7 @@ export default function GroupDetails() {
       setShowForm(false);
       setAmount("");
       setPaidBy("");
+      setDescription("");
 
       fetchData();
       fetchExpenses();
@@ -419,6 +433,10 @@ export default function GroupDetails() {
                     </div>
                   </div>
 
+                  <p className="font-semibold text-[#0f172a] mb-1">
+                 {exp.description.charAt(0).toUpperCase() + exp.description.slice(1)}
+                  </p>
+
                   <p className="text-gray-600">
                     Paid by{" "}
                     <span className="font-semibold text-[#0f172a]">
@@ -451,6 +469,14 @@ export default function GroupDetails() {
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
           />
+
+          <input
+  type="text"
+  placeholder="e.g. Hotel, Dinner, Taxi"
+  className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 mb-4 outline-none focus:ring-2 focus:ring-green-400"
+  value={description}
+  onChange={(e) => setDescription(e.target.value)}
+/>
 
           <select
             className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 mb-6 outline-none focus:ring-2 focus:ring-green-400"

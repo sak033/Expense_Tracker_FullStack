@@ -36,6 +36,7 @@ public class ExpenseController {
         expense.setAmount(req.getAmount());
         expense.setPaidBy(payer);
         expense.setGroup(group);
+        expense.setDescription(req.getDescription());
 
         // 🔥 simple equal split
         List<User> members = group.getMembers();
