@@ -14,6 +14,8 @@ export default function GroupDetails() {
   const [paidBy, setPaidBy] = useState("");
   const [members, setMembers] = useState([]);
   const [expenses, setExpenses] = useState([]);
+  const [aiExplanation, setAiExplanation] = useState("");
+  const [loadingAI, setLoadingAI] = useState(false);
   
 
   const currentUser = localStorage.getItem("name");
@@ -183,6 +185,36 @@ if (description.length > 25) {
     }
   };
 
+  const handleAIExplain = async () => {
+
+  try {
+
+    setLoadingAI(true);
+
+    const token = localStorage.getItem("token");
+
+    const res = await axios.get(
+      `https://expense-tracker-fullstack-sni7.onrender.com/groups/${id}/ai-explain`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    setAiExplanation(res.data.prompt);
+
+  } catch (err) {
+
+    console.error(err);
+    toast.error("Failed to generate AI explanation");
+
+  } finally {
+
+    setLoadingAI(false);
+  }
+};
+
   // ---------------- UI ----------------
 
  return (
@@ -301,10 +333,21 @@ if (description.length > 25) {
               <h2 className="text-2xl font-bold text-[#0f172a]">
                 Settlements
               </h2>
+<div className="flex items-center gap-3">
 
-              <div className="bg-blue-100 text-blue-600 px-4 py-2 rounded-xl text-sm font-semibold">
-                Payments
-              </div>
+  <div className="bg-blue-100 text-blue-600 px-4 py-2 rounded-xl text-sm font-semibold">
+    Payments
+  </div>
+
+  <button
+    onClick={handleAIExplain}
+    disabled={loadingAI}
+    className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-md hover:scale-[1.03] transition disabled:opacity-50"
+  >
+    {loadingAI ? "Thinking..." : "✨ AI Explain"}
+  </button>
+
+</div>
             </div>
 
             {settlements.length === 0 ? (
