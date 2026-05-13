@@ -377,16 +377,26 @@ public class GroupController {
                 .stream()
                 .filter(exp -> exp.getGroup().getId().equals(groupId))
                 .toList();
+        StringBuilder prompt = new StringBuilder();
 
-        StringBuilder explanation = new StringBuilder();
+        prompt.append("""
+You are an AI assistant inside an expense splitting app.
 
-        explanation.append("Explain the group expenses and settlements in simple English.\n\n");
+Explain ONLY using the exact data below.
 
-        explanation.append("Expenses:\n");
+Rules:
+- Do NOT assume extra people
+- Do NOT create imaginary examples
+- Do NOT explain general theory
+- Keep response short and human-friendly
+- Speak naturally like a finance assistant
+
+GROUP EXPENSES:
+""");
 
         for (Expense exp : expenses) {
 
-            explanation.append("- ")
+            prompt.append("- ")
                     .append(exp.getDescription())
                     .append(": ₹")
                     .append(exp.getAmount())
@@ -395,8 +405,37 @@ public class GroupController {
                     .append("\n");
         }
 
+        prompt.append("\nCURRENT BALANCES:\n");
+
+        Map<String, Double> balances =
+                getBalances(groupId, authentication);
+
+        balances.forEach((name, amount) -> {
+
+            if (amount < 0) {
+
+                prompt.append("- ")
+                        .append(name)
+                        .append(" owes ₹")
+                        .append(Math.abs(amount))
+                        .append("\n");
+
+            } else if (amount > 0) {
+
+                prompt.append("- ")
+                        .append(name)
+                        .append(" should receive ₹")
+                        .append(amount)
+                        .append("\n");
+            }
+        });
+
+        prompt.append("""
+\nNow explain the settlement in simple English.
+""");
+
         String aiResponse =
-                geminiService.generateResponse(explanation.toString());
+                geminiService.generateResponse(prompt.toString());
 
         return new AIExplainDTO(aiResponse);
     }

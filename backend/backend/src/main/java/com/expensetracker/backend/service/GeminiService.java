@@ -91,7 +91,7 @@ public class GeminiService {
 
             String json = response.toString();
 
-            
+
 
             Map<?, ?> responseMap =
                     mapper.readValue(json, Map.class);
