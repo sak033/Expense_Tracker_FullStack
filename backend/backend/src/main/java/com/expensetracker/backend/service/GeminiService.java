@@ -2,6 +2,8 @@ package com.expensetracker.backend.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Map;
 
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -31,15 +33,21 @@ public class GeminiService {
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setDoOutput(true);
 
-            String body = """
-            {
-              "contents": [{
-                "parts": [{
-                  "text": "%s"
-                }]
-              }]
-            }
-            """.formatted(prompt.replace("\"", "\\\""));
+            ObjectMapper mapper = new ObjectMapper();
+
+            Map<String, Object> bodyMap = Map.of(
+                    "contents", new Object[]{
+                            Map.of(
+                                    "parts", new Object[]{
+                                            Map.of(
+                                                    "text", prompt
+                                            )
+                                    }
+                            )
+                    }
+            );
+
+            String body = mapper.writeValueAsString(bodyMap);
 
             OutputStream os = conn.getOutputStream();
             os.write(body.getBytes());
