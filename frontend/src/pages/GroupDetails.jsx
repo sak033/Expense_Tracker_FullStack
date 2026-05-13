@@ -434,7 +434,9 @@ if (description.length > 25) {
                   </div>
 
                   <p className="font-semibold text-[#0f172a] mb-1">
-                 {exp.description.charAt(0).toUpperCase() + exp.description.slice(1)}
+               {exp.description
+  ? exp.description.charAt(0).toUpperCase() + exp.description.slice(1)
+  : "Expense"}
                   </p>
 
                   <p className="text-gray-600">
