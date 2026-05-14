@@ -204,7 +204,7 @@ if (description.length > 25) {
 
     const aiText = res.data.prompt;
 
-setAiExplanation(aiText);
+
 
 setChatMessages([
   {
@@ -237,7 +237,9 @@ const handleFollowUpAI = async () => {
       `https://expense-tracker-fullstack-sni7.onrender.com/groups/${id}/ai-followup`,
       {
         question: chatInput,
-        previousExplanation: aiExplanation,
+        previousExplanation: chatMessages
+  .map((m) => `${m.role}: ${m.text}`)
+  .join("\n"),
       },
       {
         headers: {
@@ -451,7 +453,7 @@ setChatInput("");
 
 
 
-                {aiExplanation && (
+               {chatMessages.length > 0 && (
 
   <div className="mt-6 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-100 rounded-3xl p-6 shadow-sm">
 
