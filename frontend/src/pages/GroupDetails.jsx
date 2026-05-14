@@ -14,11 +14,10 @@ export default function GroupDetails() {
   const [paidBy, setPaidBy] = useState("");
   const [members, setMembers] = useState([]);
   const [expenses, setExpenses] = useState([]);
-  const [aiExplanation, setAiExplanation] = useState("");
-  const [loadingAI, setLoadingAI] = useState(false);
-  const [followUpQuestion, setFollowUpQuestion] = useState("");
-  const [followUpResponse, setFollowUpResponse] = useState("");
 
+  const [loadingAI, setLoadingAI] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
+const [chatInput, setChatInput] = useState(""); 
   const currentUser = localStorage.getItem("name");
 
   // ---------------- FETCH ----------------
@@ -203,7 +202,16 @@ if (description.length > 25) {
       }
     );
 
-    setAiExplanation(res.data.prompt);
+    const aiText = res.data.prompt;
+
+setAiExplanation(aiText);
+
+setChatMessages([
+  {
+    role: "ai",
+    text: aiText,
+  },
+]);
 
   } catch (err) {
 
@@ -219,7 +227,7 @@ if (description.length > 25) {
 
 const handleFollowUpAI = async () => {
 
-  if (!followUpQuestion.trim()) return;
+  if (!chatInput.trim()) return;
 
   try {
 
@@ -228,7 +236,7 @@ const handleFollowUpAI = async () => {
     const res = await axios.post(
       `https://expense-tracker-fullstack-sni7.onrender.com/groups/${id}/ai-followup`,
       {
-        question: followUpQuestion,
+        question: chatInput,
         previousExplanation: aiExplanation,
       },
       {
@@ -238,7 +246,19 @@ const handleFollowUpAI = async () => {
       }
     );
 
-    setFollowUpResponse(res.data.prompt);
+   setChatMessages((prev) => [
+  ...prev,
+  {
+    role: "user",
+    text: chatInput,
+  },
+  {
+    role: "ai",
+    text: res.data.prompt,
+  },
+]);
+
+setChatInput("");
 
   } catch (err) {
 
@@ -454,10 +474,33 @@ const handleFollowUpAI = async () => {
 
     <div className="bg-white rounded-2xl p-5 border border-purple-100">
 
-      <p className="text-gray-700 leading-7 whitespace-pre-line">
-        {aiExplanation}
-      </p>
+    <div className="h-[400px] overflow-y-auto space-y-4 pr-2">
 
+  {chatMessages.map((msg, index) => (
+
+    <div
+      key={index}
+      className={`flex ${
+        msg.role === "user"
+          ? "justify-end"
+          : "justify-start"
+      }`}
+    >
+
+      <div
+        className={`max-w-[85%] px-4 py-3 rounded-3xl shadow-sm whitespace-pre-line leading-7 ${
+          msg.role === "user"
+            ? "bg-purple-600 text-white rounded-br-md"
+            : "bg-gray-100 text-gray-800 rounded-bl-md"
+        }`}
+      >
+
+        {msg.text}
+
+      </div>
+    </div>
+  ))}
+</div>  
 
  <div className="mt-4 flex gap-3">
 
@@ -465,8 +508,13 @@ const handleFollowUpAI = async () => {
     type="text"
     placeholder="Ask AI anything about this settlement..."
     className="flex-1 px-4 py-3 rounded-2xl border border-gray-200 outline-none focus:ring-2 focus:ring-purple-400"
-    value={followUpQuestion}
-    onChange={(e) => setFollowUpQuestion(e.target.value)}
+    value={chatInput}
+    onChange={(e) => setChatInput(e.target.value)}
+    onKeyDown={(e) => {
+  if (e.key === "Enter") {
+    handleFollowUpAI();
+  }
+}}
   />
 
   <button
@@ -478,16 +526,7 @@ const handleFollowUpAI = async () => {
 
 </div>
 
-{followUpResponse && (
 
-  <div className="mt-4 bg-purple-50 border border-purple-100 rounded-2xl p-4">
-
-    <p className="text-gray-700 leading-7 whitespace-pre-line">
-      {followUpResponse}
-    </p>
-
-  </div>
-)}
     </div>
   </div>
 )}
