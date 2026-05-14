@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 
@@ -16,9 +16,11 @@ export default function GroupDetails() {
   const [expenses, setExpenses] = useState([]);
 
   const [loadingAI, setLoadingAI] = useState(false);
+  const [loadingFollowUp, setLoadingFollowUp] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
 const [chatInput, setChatInput] = useState(""); 
   const currentUser = localStorage.getItem("name");
+  const chatEndRef = useRef(null);
 
   // ---------------- FETCH ----------------
 
@@ -66,6 +68,14 @@ const [chatInput, setChatInput] = useState("");
     fetchMembers();
     fetchExpenses();
   }, []);
+
+  useEffect(() => {
+
+  chatEndRef.current?.scrollIntoView({
+    behavior: "smooth",
+  });
+
+}, [chatMessages]);
 
   // ---------------- ACTIONS ----------------
 
@@ -229,14 +239,28 @@ const handleFollowUpAI = async () => {
 
   if (!chatInput.trim()) return;
 
+  const userMessage = chatInput;
+
   try {
+
+    setLoadingFollowUp(true);
+
+    setChatMessages((prev) => [
+  ...prev,
+  {
+    role: "user",
+    text: userMessage,
+  },
+]);
+
+setChatInput("");
 
     const token = localStorage.getItem("token");
 
     const res = await axios.post(
       `https://expense-tracker-fullstack-sni7.onrender.com/groups/${id}/ai-followup`,
       {
-        question: chatInput,
+        question: userMessage,
         previousExplanation: chatMessages
   .map((m) => `${m.role}: ${m.text}`)
   .join("\n"),
@@ -250,10 +274,7 @@ const handleFollowUpAI = async () => {
 
    setChatMessages((prev) => [
   ...prev,
-  {
-    role: "user",
-    text: chatInput,
-  },
+  
   {
     role: "ai",
     text: res.data.prompt,
@@ -267,6 +288,13 @@ setChatInput("");
     console.error(err);
     toast.error("AI follow-up failed");
   }
+
+  finally {
+
+  setLoadingFollowUp(false);
+}
+
+  
 };
 
   // ---------------- UI ----------------
@@ -502,6 +530,8 @@ setChatInput("");
       </div>
     </div>
   ))}
+
+  <div ref={chatEndRef}></div>
 </div>  
 
  <div className="mt-4 flex gap-3">
@@ -521,9 +551,10 @@ setChatInput("");
 
   <button
   onClick={handleFollowUpAI}
+  disabled={loadingFollowUp}
   className="bg-purple-600 hover:bg-purple-700 text-white px-5 rounded-2xl font-semibold shadow-lg transition"
 >
-  Ask AI
+ {loadingFollowUp ? "Thinking..." : "Ask AI"}
 </button>
 
 </div>
