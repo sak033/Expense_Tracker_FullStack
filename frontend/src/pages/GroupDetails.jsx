@@ -504,7 +504,7 @@ setChatInput("");
 
     <div className="bg-white rounded-2xl p-5 border border-purple-100">
 
-    <div className="h-[400px] overflow-y-auto space-y-4 pr-2">
+    <div className="h-[350px] sm:h-[450px] overflow-y-auto space-y-4 pr-2">
 
   {chatMessages.map((msg, index) => (
 
@@ -518,7 +518,7 @@ setChatInput("");
     >
 
       <div
-        className={`max-w-[85%] px-4 py-3 rounded-3xl shadow-sm whitespace-pre-line leading-7 ${
+        className={`max-w-[90%] sm:max-w-[75%] px-4 py-3 rounded-3xl shadow-sm whitespace-pre-line leading-7 ${
           msg.role === "user"
             ? "bg-purple-600 text-white rounded-br-md"
             : "bg-gray-100 text-gray-800 rounded-bl-md"
@@ -534,12 +534,12 @@ setChatInput("");
   <div ref={chatEndRef}></div>
 </div>  
 
- <div className="mt-4 flex gap-3">
+ <div className="mt-4 flex items-center gap-2 sticky bottom-0 bg-white pt-3">
 
   <input
     type="text"
     placeholder="Ask AI anything about this settlement..."
-    className="flex-1 px-4 py-3 rounded-2xl border border-gray-200 outline-none focus:ring-2 focus:ring-purple-400"
+    className="flex-1 px-4 py-3 rounded-full border border-gray-200 bg-gray-50 outline-none focus:ring-2 focus:ring-purple-400 text-sm sm:text-base"
     value={chatInput}
     onChange={(e) => setChatInput(e.target.value)}
     onKeyDown={(e) => {
@@ -552,9 +552,9 @@ setChatInput("");
   <button
   onClick={handleFollowUpAI}
   disabled={loadingFollowUp}
-  className="bg-purple-600 hover:bg-purple-700 text-white px-5 rounded-2xl font-semibold shadow-lg transition"
+  className="min-w-[52px] h-[52px] rounded-full bg-purple-600 hover:bg-purple-700 flex items-center justify-center text-white shadow-lg transition disabled:opacity-50"
 >
- {loadingFollowUp ? "Thinking..." : "Ask AI"}
+ {loadingFollowUp ? "..." : "➤"}
 </button>
 
 </div>
