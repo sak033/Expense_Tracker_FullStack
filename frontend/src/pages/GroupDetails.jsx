@@ -483,7 +483,7 @@ setChatInput("");
 
                {chatMessages.length > 0 && (
 
-  <div className="mt-6 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-100 rounded-3xl p-6 shadow-sm">
+  <div className="mt-6 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-100 rounded-3xl p-3 sm:p-6 shadow-sm">
 
     <div className="flex items-center gap-3 mb-4">
 
@@ -502,7 +502,7 @@ setChatInput("");
       </div>
     </div>
 
-    <div className="bg-white rounded-2xl p-5 border border-purple-100">
+    <div className="bg-white rounded-2xl p-3 sm:p-5 border border-purple-100">
 
     <div className="h-[350px] sm:h-[450px] overflow-y-auto space-y-4 pr-2">
 
@@ -518,10 +518,10 @@ setChatInput("");
     >
 
       <div
-        className={`max-w-[90%] sm:max-w-[75%] px-4 py-3 rounded-3xl shadow-sm whitespace-pre-line leading-7 ${
+        className={`w-fit max-w-[95%] sm:max-w-[80%] px-4 py-3 rounded-3xl shadow-sm whitespace-pre-line leading-7 ${
           msg.role === "user"
             ? "bg-purple-600 text-white rounded-br-md"
-            : "bg-gray-100 text-gray-800 rounded-bl-md"
+            : "bg-gray-100 text-gray-800 rounded-bl-md text-[15px] sm:text-base"
         }`}
       >
 
